@@ -1,0 +1,193 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
+}
+
+enum Highlight {
+  HighSpeedInternetAccess
+  WasherDryer
+  AirConditioning
+  Heating
+  SmokeFree
+  CableReady
+  SatelliteTV
+  DoubleVanities
+  TubShower
+  Intercom
+  SprinklerSystem
+  RecentlyRenovated
+  CloseToTransit
+  GreatView
+  QuietNeighborhood
+}
+
+enum Amenity {
+  WasherDryer
+  AirConditioning
+  Dishwasher
+  HighSpeedInternet
+  HardwoodFloors
+  WalkInClosets
+  Microwave
+  Refrigerator
+  Pool
+  Gym
+  Parking
+  PetsAllowed
+  WiFi
+}
+
+enum TipoAlojamiento {
+  ColegioMayor
+  Piso
+  PisoCompartido
+  ResidenciaFamiliar
+  ResidenciaUniversitaria
+}
+
+enum EstadoSolicitud {
+  Pendiente
+  Denegada
+  Aprobada
+}
+
+enum PaymentStatus {
+  Pending
+  Paid
+  PartiallyPaid
+  Overdue
+}
+
+model Alojamiento {
+  id                    Int          @id @default(autoincrement())
+  nombre                String
+  descripcion           String
+  precio                Float
+  habitaciones          Int
+  banos                 Float
+  superficie            Int
+  plazasLibres          Int
+  tipoAlojamiento                  TipoAlojamiento
+  hayTelevision         Boolean      @default(false)
+  hayTelefono           Boolean      @default(false)
+  hayInternet           Boolean      @default(false)
+  hayTerraza            Boolean      @default(false)
+  hayAscensor           Boolean      @default(false)
+  hayGaraje             Boolean      @default(false)
+  hayLavavajillas       Boolean      @default(false)
+  hayHorno              Boolean      @default(false)
+  hayMicroondas         Boolean      @default(false)
+  hayNevera             Boolean      @default(false)
+  hayLavadora           Boolean      @default(false)
+  haySecadora           Boolean      @default(false)
+  hayPortero            Boolean      @default(false)
+  hayMuebles            Boolean      @default(false)
+  hayCalefaccion        Boolean      @default(false)
+  hayAireAcondicionado  Boolean      @default(false)
+  hayGas                Boolean      @default(false)
+  hayPiscina            Boolean      @default(false)
+  hayZonaComunitaria    Boolean      @default(false)
+  hayGimnasio           Boolean      @default(false)
+  aguaIncluido          Boolean      @default(false)
+  gasIncluido           Boolean      @default(false)
+  electricidadIncluido  Boolean      @default(false)
+  internetIncluido      Boolean      @default(false)
+  photoUrls             String[]
+  postedDate            DateTime     @default(now())
+  averageRating         Float?       @default(0)
+  numberOfReviews       Int?         @default(0)
+  locationId            Int
+  managerCognitoId      String
+
+  location              Location     @relation(fields: [locationId], references: [id])
+  propietario           Propietario  @relation(fields: [managerCognitoId], references: [cognitoId])
+  leases                Lease[]
+  solicitudes           Solicitud[]
+  favoritedBy           Inquilino[]  @relation("TenantFavorites")
+  inquilinos            Inquilino[]  @relation("TenantProperties")
+}
+
+model Propietario {
+  id          Int    @id @default(autoincrement())
+  cognitoId   String @unique
+  nombre      String
+  email       String
+  telefono    String
+
+  managedProperties Alojamiento[]
+}
+
+model Inquilino {
+  id            Int    @id @default(autoincrement())
+  cognitoId     String @unique
+  nombre        String
+  email         String
+  telefono      String
+
+  alojamientos  Alojamiento[]    @relation("TenantProperties")
+  favoritos     Alojamiento[]    @relation("TenantFavorites")
+  solicitudes   Solicitud[]
+  leases        Lease[]
+}
+
+model Location {
+  id          Int                                   @id @default(autoincrement())
+  address     String
+  city        String
+  state       String
+  country     String
+  postalCode  String
+  coordinates Unsupported("geography(Point, 4326)")
+
+  alojamientos Alojamiento[]
+}
+
+model Solicitud {
+  id              Int               @id @default(autoincrement())
+  applicationDate DateTime
+  estado          EstadoSolicitud
+  alojamientoId   Int
+  tenantCognitoId String
+  nombre            String
+  email           String
+  telefono     String
+  mensaje         String?
+  leaseId         Int?              @unique
+
+  alojamiento      Alojamiento @relation(fields: [alojamientoId], references: [id])
+  inquilino       Inquilino   @relation(fields: [tenantCognitoId], references: [cognitoId])
+  lease           Lease?   @relation(fields: [leaseId], references: [id])
+}
+
+model Lease {
+  id              Int      @id @default(autoincrement())
+  startDate       DateTime
+  endDate         DateTime
+  rent            Float
+  deposit         Float
+  alojamientoId   Int
+  tenantCognitoId String
+
+  alojamiento        Alojamiento     @relation(fields: [alojamientoId], references: [id])
+  inquilino       Inquilino       @relation(fields: [tenantCognitoId], references: [cognitoId])
+  solicitud       Solicitud?
+  payments        Payment[]
+}
+
+model Payment {
+  id            Int           @id @default(autoincrement())
+  amountDue     Float
+  amountPaid    Float
+  dueDate       DateTime
+  paymentDate   DateTime
+  paymentStatus PaymentStatus
+  leaseId       Int
+
+  lease Lease @relation(fields: [leaseId], references: [id])
+}
