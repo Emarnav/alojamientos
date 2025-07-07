@@ -23,11 +23,73 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createProperty = exports.getProperty = exports.getProperties = void 0;
+exports.createProperty = exports.getProperty = exports.getProperties = exports.updateProperty = void 0;
 const client_1 = require("@prisma/client");
 const wkt_1 = require("@terraformer/wkt");
 const axios_1 = __importDefault(require("axios"));
 const prisma = new client_1.PrismaClient();
+const updateProperty = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c, _d;
+    try {
+        const { id } = req.params;
+        const files = req.files;
+        const _e = req.body, { direccion, localidad, provincia, pais, codigoPostal, managerCognitoId } = _e, propertyData = __rest(_e, ["direccion", "localidad", "provincia", "pais", "codigoPostal", "managerCognitoId"]);
+        const property = yield prisma.alojamiento.findUnique({
+            where: { id: Number(id) },
+            include: { location: true, propietario: true },
+        });
+        if (!property) {
+            res.status(404).json({ message: "Alojamiento no encontrado" });
+            return;
+        }
+        let photoUrls = property.photoUrls;
+        if (files && files.length > 0) {
+            photoUrls = files.map((file) => `/uploads/${file.filename}`);
+        }
+        const geocodingUrl = `https://nominatim.openstreetmap.org/search?${new URLSearchParams({
+            street: direccion,
+            city: localidad,
+            country: "Spain",
+            postalcode: codigoPostal,
+            format: "json",
+            limit: "1",
+        }).toString()}`;
+        const geocodingResponse = yield axios_1.default.get(geocodingUrl, {
+            headers: {
+                "User-Agent": "UCHCEU (desarrolloweb@uchceu.es)",
+            },
+        });
+        const [longitude, latitude] = ((_a = geocodingResponse.data[0]) === null || _a === void 0 ? void 0 : _a.lon) && ((_b = geocodingResponse.data[0]) === null || _b === void 0 ? void 0 : _b.lat)
+            ? [
+                parseFloat((_c = geocodingResponse.data[0]) === null || _c === void 0 ? void 0 : _c.lon),
+                parseFloat((_d = geocodingResponse.data[0]) === null || _d === void 0 ? void 0 : _d.lat),
+            ]
+            : [0, 0];
+        yield prisma.$executeRaw `
+      UPDATE "Location"
+      SET address = ${direccion},
+          city = ${localidad},
+          state = ${provincia},
+          country = 'Spain',
+          "postalCode" = ${codigoPostal},
+          coordinates = ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)
+      WHERE id = ${property.locationId};
+    `;
+        const updatedProperty = yield prisma.alojamiento.update({
+            where: { id: Number(id) },
+            data: Object.assign(Object.assign({}, propertyData), { photoUrls,
+                managerCognitoId, hayTelevision: propertyData.hayTelevision === "true", hayTelefono: propertyData.hayTelefono === "true", hayInternet: propertyData.hayInternet === "true", hayTerraza: propertyData.hayTerraza === "true", hayAscensor: propertyData.hayAscensor === "true", hayGaraje: propertyData.hayGaraje === "true", hayLavavajillas: propertyData.hayLavavajillas === "true", hayHorno: propertyData.hayHorno === "true", hayMicroondas: propertyData.hayMicroondas === "true", hayNevera: propertyData.hayNevera === "true", hayLavadora: propertyData.hayLavadora === "true", haySecadora: propertyData.haySecadora === "true", hayPortero: propertyData.hayPortero === "true", hayMuebles: propertyData.hayMuebles === "true", hayCalefaccion: propertyData.hayCalefaccion === "true", hayAireAcondicionado: propertyData.hayAireAcondicionado === "true", hayGas: propertyData.hayGas === "true", hayPiscina: propertyData.hayPiscina === "true", hayZonaComunitaria: propertyData.hayZonaComunitaria === "true", hayGimnasio: propertyData.hayGimnasio === "true", aguaIncluido: propertyData.aguaIncluido === "true", gasIncluido: propertyData.gasIncluido === "true", electricidadIncluido: propertyData.electricidadIncluido === "true", internetIncluido: propertyData.internetIncluido === "true", precio: parseFloat(propertyData.precio), habitaciones: parseInt(propertyData.habitaciones), banos: parseFloat(propertyData.banos), plazasLibres: parseInt(propertyData.plazasLibres), superficie: parseInt(propertyData.superficie), descripcion: propertyData.descripcion, tipoAlojamiento: propertyData.tipoAlojamiento, dirigidoA: propertyData.dirigidoA, infoExtra: propertyData.infoExtra }),
+            include: { location: true, propietario: true },
+        });
+        res.json(updatedProperty);
+    }
+    catch (err) {
+        res
+            .status(500)
+            .json({ message: `Error al actualizar la propiedad: ${err.message}` });
+    }
+});
+exports.updateProperty = updateProperty;
 const getProperties = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { favoriteIds, priceMin, priceMax, beds, baths, propertyType, squareFeetMin, squareFeetMax, amenities, availableFrom, latitude, longitude, } = req.query;

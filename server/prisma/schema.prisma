@@ -68,6 +68,8 @@ model Alojamiento {
   id                    Int          @id @default(autoincrement())
   nombre                String
   descripcion           String
+  dirigidoA             String
+  infoExtra             String
   precio                Float
   habitaciones          Int
   banos                 Float

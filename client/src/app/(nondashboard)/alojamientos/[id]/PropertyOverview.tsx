@@ -14,10 +14,11 @@ const PropertyOverview = ({ alojamiento }: PropertyOverviewProps) => {
             {alojamiento.location?.city}, {alojamiento.location?.state},{" "}
             {alojamiento.location?.country}
           </span>
-          <div className="flex justify-between items-center gap-3">
-
-            <span className="text-green-600">Anuncio verificado</span>
-          </div>
+          {alojamiento.esDestacado && (
+            <div className="flex justify-between items-center gap-3">
+              <span className="text-green-600">Anuncio destacado</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -26,6 +27,13 @@ const PropertyOverview = ({ alojamiento }: PropertyOverviewProps) => {
         <div className="flex justify-between items-center gap-4 px-5">
           <div>
             <div className="text-sm text-gray-500">Dirigido a</div>
+            <div className="font-semibold">
+              {alojamiento.dirigidoA}
+            </div>
+          </div>
+          <div className="border-l border-gray-300 h-10"></div>
+          <div>
+            <div className="text-sm text-gray-500">Tipo</div>
             <div className="font-semibold">
               {alojamiento.tipoAlojamiento}
             </div>
@@ -40,13 +48,7 @@ const PropertyOverview = ({ alojamiento }: PropertyOverviewProps) => {
             <div className="text-sm text-gray-500">Plazas Disponibles</div>
             <div className="font-semibold">{alojamiento.plazasLibres}</div>
           </div>
-          <div className="border-l border-gray-300 h-10"></div>
-          <div>
-            <div className="text-sm text-gray-500">m2</div>
-            <div className="font-semibold">
-              {alojamiento.superficie}
-            </div>
-          </div>
+
         </div>
       </div>
 

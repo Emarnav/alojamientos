@@ -2,7 +2,7 @@ import { Bath, Bed, Heart, House, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
-import { getAbsoluteImageUrl } from "@/lib/utils";
+import { getAbsoluteImageUrls } from "@/lib/utils";
 
 
 const Card = ({
@@ -13,7 +13,7 @@ const Card = ({
   alojamientoLink,
 }: CardProps) => {
   const [imgSrc, setImgSrc] = useState(
-    getAbsoluteImageUrl(alojamiento.photoUrls?.[0])
+    getAbsoluteImageUrls(alojamiento.photoUrls)[0]
   );
   
   return (

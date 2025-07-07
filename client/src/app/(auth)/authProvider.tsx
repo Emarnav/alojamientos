@@ -32,11 +32,11 @@ Amplify.configure({
 const components = {
   Header() {
     return (
-      <View className="mt-4 mb-7">
+      <View className="mt-4 mb-7 !text-center">
         <Heading level={3} className="!text-2xl !font-bold">
-          RENT
+          UCH
           <span className="text-secondary-500 font-light hover:!text-primary-300">
-            IFUL
+            CEU
           </span>
         </Heading>
         <p className="text-muted-foreground mt-2">
@@ -47,16 +47,25 @@ const components = {
   },
   SignIn: {
     Footer() {
-      const { toSignUp } = useAuthenticator();
+      const { toSignUp, toForgotPassword } = useAuthenticator();
       return (
         <View className="text-center mt-4">
           <p className="text-muted-foreground">
             ¿No estás registrado?{" "}
             <button
               onClick={toSignUp}
-              className="text-primary hover:underline bg-transparent border-none p-0"
+              className="text-primary hover:underline bg-transparent border-none p-0 font-bold"
             >
               Regístrate.
+            </button>
+          </p>
+          <p className="text-muted-foreground">
+
+            <button
+              onClick={toForgotPassword}
+              className="text-primary hover:underline bg-transparent border-none p-0 mt-2"
+            >
+              ¿Olvidaste tu contraseña?
             </button>
           </p>
         </View>
@@ -71,7 +80,7 @@ const components = {
         <>
           <Authenticator.SignUp.FormFields />
           <RadioGroupField
-            legend="Role"
+            legend="Perfil"
             name="custom:role"
             errorMessage={validationErrors?.["custom:role"]}
             hasError={!!validationErrors?.["custom:role"]}
@@ -92,7 +101,7 @@ const components = {
             ¿Ya estás registrado?{" "}
             <button
               onClick={toSignIn}
-              className="text-primary hover:underline bg-transparent border-none p-0"
+              className="text-primary hover:underline bg-transparent border-none p-0 font-bold"
             >
               Inicia sesión.
             </button>
@@ -100,6 +109,8 @@ const components = {
         </View>
       );
     },
+  },
+  ForgotPassword: {
   },
 };
 
@@ -144,6 +155,14 @@ const formFields = {
       isRequired: true,
     },
   },
+  forgotPassword: {
+    username: {
+      order: 1,
+      placeholder: "Introduce tu email",
+      label: "Email",
+      isRequired: true,
+    },
+  },
 };
 
 
@@ -152,7 +171,7 @@ const Auth = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const isAuthPage = pathname.match(/^\/(signin|signup)$/);
+  const isAuthPage = pathname.match(/^\/(login|registro|recuperar-contrasena)$/);
   const isDashboardPage =
     pathname.startsWith("/propietario") || pathname.startsWith("/inquilinos");
 
@@ -171,7 +190,13 @@ const Auth = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="h-full">
       <Authenticator
-        initialState={pathname.includes("signup") ? "signUp" : "signIn"}
+        initialState={
+          pathname.includes("registro")
+            ? "signUp"
+            : pathname.includes("recuperar-contrasena")
+            ? "forgotPassword"
+            : "signIn"
+        }
         components={components}
         formFields={formFields}
       >

@@ -19,13 +19,13 @@ const Applications = () => {
   });
 
   if (isLoading) return <Loading />;
-  if (isError || !solicitudes) return <div>Error fetching applications</div>;
+  if (isError || !solicitudes) return <div>Error al obtener las solicitudes</div>;
 
   return (
     <div className="dashboard-container">
       <Header
-        title="Applications"
-        subtitle="Track and manage your property rental applications"
+        title="Solicitudes"
+        subtitle="Consulta y gestiona tus solicitudes de alquiler"
       />
       <div className="w-full">
         {solicitudes?.map((solicitud) => (
@@ -38,18 +38,18 @@ const Applications = () => {
               {solicitud.estado === "Approved" ? (
                 <div className="bg-green-100 p-4 text-green-700 grow flex items-center">
                   <CircleCheckBig className="w-5 h-5 mr-2" />
-                  The property is being rented by you until{" "}
+                  La propiedad está alquilada por ti hasta el{" "}
                   {new Date(solicitud.lease?.endDate).toLocaleDateString()}
                 </div>
               ) : solicitud.estado === "Pending" ? (
                 <div className="bg-yellow-100 p-4 text-yellow-700 grow flex items-center">
                   <Clock className="w-5 h-5 mr-2" />
-                  Your application is pending approval
+                  Tu solicitud está pendiente de aprobación
                 </div>
               ) : (
                 <div className="bg-red-100 p-4 text-red-700 grow flex items-center">
                   <XCircle className="w-5 h-5 mr-2" />
-                  Your application has been denied
+                  Tu solicitud ha sido rechazada
                 </div>
               )}
 
@@ -58,7 +58,7 @@ const Applications = () => {
                           rounded-md flex items-center justify-center hover:bg-primary-700 hover:text-primary-50`}
               >
                 <Download className="w-5 h-5 mr-2" />
-                Download Agreement
+                Descargar contrato
               </button>
             </div>
           </ApplicationCard>

@@ -2,83 +2,119 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AmenityIcons } from "@/lib/constants";
 import { formatEnumString } from "@/lib/utils";
 import { useGetPropertyQuery } from "@/state/api";
-import { HelpCircle } from "lucide-react";
 import React from "react";
+import { Tv, Wifi, Phone, Sun, ArrowUpFromLine, Car, Utensils, ChefHat, Microwave, Refrigerator, WashingMachine, Wind, UserCheck, Sofa, Flame, Snowflake, Droplets, Waves, Users, Dumbbell, HelpCircle } from "lucide-react";
 
+const amenitiesList = [
+  { key: "hayTelevision", label: "Televisión", icon: Tv },
+  { key: "hayTelefono", label: "Teléfono", icon: Phone },
+  { key: "hayInternet", label: "Internet", icon: Wifi },
+  { key: "hayTerraza", label: "Terraza", icon: Sun },
+  { key: "hayAscensor", label: "Ascensor", icon: ArrowUpFromLine },
+  { key: "hayGaraje", label: "Garaje", icon: Car },
+  { key: "hayLavavajillas", label: "Lavavajillas", icon: Utensils },
+  { key: "hayHorno", label: "Horno", icon: ChefHat },
+  { key: "hayMicroondas", label: "Microondas", icon: Microwave },
+  { key: "hayNevera", label: "Nevera", icon: Refrigerator },
+  { key: "hayLavadora", label: "Lavadora", icon: WashingMachine },
+  { key: "haySecadora", label: "Secadora", icon: Wind },
+  { key: "hayPortero", label: "Portero", icon: UserCheck },
+  { key: "hayMuebles", label: "Amueblado", icon: Sofa },
+  { key: "hayCalefaccion", label: "Calefacción", icon: Flame },
+  { key: "hayAireAcondicionado", label: "Aire acondicionado", icon: Snowflake },
+  { key: "hayGas", label: "Gas", icon: Droplets },
+  { key: "hayPiscina", label: "Piscina", icon: Waves },
+  { key: "hayZonaComunitaria", label: "Zona comunitaria", icon: Users },
+  { key: "hayGimnasio", label: "Gimnasio", icon: Dumbbell },
+];
 const PropertyDetails = ({ alojamiento }: PropertyDetailsProps) => {
 
   return (
     <div className="mb-6">
-      {/* Amenities */}
+      {/* Comodidades */}
       <div>
-        <h2 className="text-xl font-semibold my-3">Características alojamiento</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-         {/*  {alojamiento.amenities.map((amenity: AmenityEnum) => {
-            const Icon = AmenityIcons[amenity as AmenityEnum] || HelpCircle;
-            return (
-              <div
-                key={amenity}
-                className="flex flex-col items-center border rounded-xl py-8 px-4"
-              >
-                <Icon className="w-8 h-8 mb-2 text-gray-700" />
-                <span className="text-sm text-center text-gray-700">
-                  {formatEnumString(amenity)}
-                </span>
-              </div>
-            );
-          })}*/}
-        </div>
+      <h2 className="text-xl font-semibold my-3">Servicios del alojamiento</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        {amenitiesList
+        .filter((item) => alojamiento[item.key])
+        .map(({ key, label, icon: Icon }) => (
+          <div
+          key={key}
+          className="flex flex-col items-center border rounded-xl py-8 px-4"
+          >
+          <Icon className="w-8 h-8 mb-2 text-gray-700" />
+          <span className="text-sm text-center text-gray-700">
+            {label}
+          </span>
+          </div>
+        ))}
+      </div>
       </div>
 
+      {/* Sección de pestañas */}
+      <div className="mt-16">
+      <h3 className="text-xl font-semibold text-primary-800 dark:text-primary-100 mb-5">
+        Tarifas y Políticas
+      </h3>
+      <p className="text-sm text-primary-600 dark:text-primary-300 mt-2">
+        Las tarifas a continuación se basan en datos suministrados por la comunidad y pueden excluir tarifas adicionales y servicios.
+      </p>
+      <Tabs defaultValue="required-fees" className="mt-8">
+        <TabsList className="grid w-full grid-cols-3">
+        <TabsTrigger value="servicios-incluidos">Servicios incluidos en el precio</TabsTrigger>
+        <TabsTrigger value="datos-interes">Datos de interés</TabsTrigger>
+        <TabsTrigger value="info-extra">Información adicional</TabsTrigger>
+        </TabsList>
+        <TabsContent value="servicios-incluidos" className="w-3/3">
 
-      {/* Tabs Section */}
-      <div>
-        <h3 className="text-xl font-semibold text-primary-800 dark:text-primary-100 mb-5">
-          Fees and Policies
-        </h3>
-        <p className="text-sm text-primary-600 dark:text-primary-300 mt-2">
-          The fees below are based on community-supplied data and may exclude
-          additional fees and utilities.
-        </p>
-        <Tabs defaultValue="required-fees" className="mt-8">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="required-fees">Required Fees</TabsTrigger>
-            <TabsTrigger value="pets">Pets</TabsTrigger>
-            <TabsTrigger value="parking">Parking</TabsTrigger>
-          </TabsList>
-          <TabsContent value="required-fees" className="w-1/3">
-            <p className="font-semibold mt-5 mb-2">One time move in fees</p>
-            <hr />
-            <div className="flex justify-between py-2 bg-secondary-50">
-              <span className="text-primary-700 font-medium">
-                Application Fee
-              </span>
-              <span className="text-primary-700">
-                $
-              </span>
-            </div>
-            <hr />
-            <div className="flex justify-between py-2 bg-secondary-50">
-              <span className="text-primary-700 font-medium">
-                Security Deposit
-              </span>
-              <span className="text-primary-700">
-                $
-              </span>
-            </div>
-            <hr />
-          </TabsContent>
-          <TabsContent value="pets">
-            <p className="font-semibold mt-5 mb-2">
-              Pets are not allowed
-            </p>
-          </TabsContent>
-          <TabsContent value="parking">
-            <p className="font-semibold mt-5 mb-2">
-              Parking is included
-            </p>
-          </TabsContent>
-        </Tabs>
+          <div className="flex justify-between py-2">
+            <span className="text-primary-700 font-medium">Internet incluido</span>
+            <span className="text-primary-700">
+              {alojamiento.internetIncluido ? "Sí" : "No"}
+            </span>
+          </div>
+          <hr />
+          <div className="flex justify-between py-2">
+            <span className="text-primary-700 font-medium">Gas incluido</span>
+            <span className="text-primary-700">
+              {alojamiento.gasIncluido ? "Sí" : "No"}
+            </span>
+          </div>
+          <hr />
+          <div className="flex justify-between py-2">
+            <span className="text-primary-700 font-medium">Electricidad incluida</span>
+            <span className="text-primary-700">
+              {alojamiento.electricidadIncluido ? "Sí" : "No"}
+            </span>
+          </div>
+          <hr />
+          <div className="flex justify-between py-2">
+            <span className="text-primary-700 font-medium">Agua incluida</span>
+            <span className="text-primary-700">
+              {alojamiento.aguaIncluida ? "Sí" : "No"}
+            </span>
+          </div>
+          <hr />
+        </TabsContent>
+        <TabsContent value="datos-interes">
+        <div className="space-y-2 mt-5 mb-2">
+          <p className="font-semibold">
+            Habitaciones: <span className="font-normal">{alojamiento.habitaciones ?? "N/D"}</span>
+          </p>
+          <p className="font-semibold">
+            Baños: <span className="font-normal">{alojamiento.banos ?? "N/D"}</span>
+          </p>
+          <p className="font-semibold">
+            Superficie total: <span className="font-normal">{alojamiento.superficie ? `${alojamiento.superficie} m²` : "N/D"}</span>
+          </p>
+        </div>
+        </TabsContent>
+        <TabsContent value="info-extra">
+          <p className="text-sm">
+            {alojamiento.infoExtra ? alojamiento.infoExtra : "No hay información adicional disponible."}
+          </p>
+        </TabsContent>
+      </Tabs>
       </div>
     </div>
   );

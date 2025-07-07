@@ -2,12 +2,127 @@ import { Request, Response } from "express";
 import { PrismaClient, Prisma,  } from "@prisma/client";
 import { wktToGeoJSON } from "@terraformer/wkt";
 import { Location } from "@prisma/client";
-import path from "path";
-import fs from "fs";
 import axios from "axios";
 
 const prisma = new PrismaClient();
 
+
+export const updateProperty = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const files = req.files as Express.Multer.File[];
+    const {
+      direccion,
+      localidad,
+      provincia,
+      pais,
+      codigoPostal,
+      managerCognitoId,
+      ...propertyData
+    } = req.body;
+
+    const property = await prisma.alojamiento.findUnique({
+      where: { id: Number(id) },
+      include: { location: true, propietario: true },
+    });
+
+    if (!property) {
+      res.status(404).json({ message: "Alojamiento no encontrado" });
+      return;
+    }
+
+    let photoUrls = property.photoUrls;
+    if (files && files.length > 0) {
+      photoUrls = files.map((file) => `/uploads/${file.filename}`);
+    }
+
+    const geocodingUrl = `https://nominatim.openstreetmap.org/search?${new URLSearchParams(
+      {
+        street: direccion,
+        city: localidad,
+        country: "Spain",
+        postalcode: codigoPostal,
+        format: "json",
+        limit: "1",
+      }
+    ).toString()}`;
+    const geocodingResponse = await axios.get(geocodingUrl, {
+      headers: {
+        "User-Agent": "UCHCEU (desarrolloweb@uchceu.es)",
+      },
+    });
+    const [longitude, latitude] =
+      geocodingResponse.data[0]?.lon && geocodingResponse.data[0]?.lat
+        ? [
+            parseFloat(geocodingResponse.data[0]?.lon),
+            parseFloat(geocodingResponse.data[0]?.lat),
+          ]
+        : [0, 0];
+
+    await prisma.$executeRaw`
+      UPDATE "Location"
+      SET address = ${direccion},
+          city = ${localidad},
+          state = ${provincia},
+          country = 'Spain',
+          "postalCode" = ${codigoPostal},
+          coordinates = ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)
+      WHERE id = ${property.locationId};
+    `;
+
+    const updatedProperty = await prisma.alojamiento.update({
+      where: { id: Number(id) },
+      data: {
+        ...propertyData,
+        photoUrls,
+        managerCognitoId,
+        hayTelevision: propertyData.hayTelevision === "true",
+        hayTelefono: propertyData.hayTelefono === "true",
+        hayInternet: propertyData.hayInternet === "true",
+        hayTerraza: propertyData.hayTerraza === "true",
+        hayAscensor: propertyData.hayAscensor === "true",
+        hayGaraje: propertyData.hayGaraje === "true",
+        hayLavavajillas: propertyData.hayLavavajillas === "true",
+        hayHorno: propertyData.hayHorno === "true",
+        hayMicroondas: propertyData.hayMicroondas === "true",
+        hayNevera: propertyData.hayNevera === "true",
+        hayLavadora: propertyData.hayLavadora === "true",
+        haySecadora: propertyData.haySecadora === "true",
+        hayPortero: propertyData.hayPortero === "true",
+        hayMuebles: propertyData.hayMuebles === "true",
+        hayCalefaccion: propertyData.hayCalefaccion === "true",
+        hayAireAcondicionado: propertyData.hayAireAcondicionado === "true",
+        hayGas: propertyData.hayGas === "true",
+        hayPiscina: propertyData.hayPiscina === "true",
+        hayZonaComunitaria: propertyData.hayZonaComunitaria === "true",
+        hayGimnasio: propertyData.hayGimnasio === "true",
+        aguaIncluido: propertyData.aguaIncluido === "true",
+        gasIncluido: propertyData.gasIncluido === "true",
+        electricidadIncluido: propertyData.electricidadIncluido === "true",
+        internetIncluido: propertyData.internetIncluido === "true",
+        precio: parseFloat(propertyData.precio),
+        habitaciones: parseInt(propertyData.habitaciones),
+        banos: parseFloat(propertyData.banos),
+        plazasLibres: parseInt(propertyData.plazasLibres),
+        superficie: parseInt(propertyData.superficie),
+        descripcion: propertyData.descripcion,
+        tipoAlojamiento: propertyData.tipoAlojamiento,
+        dirigidoA: propertyData.dirigidoA,
+        infoExtra: propertyData.infoExtra,
+      },
+      include: { location: true, propietario: true },
+    });
+
+    res.json(updatedProperty);
+  } catch (err: any) {
+    res
+      .status(500)
+      .json({ message: `Error al actualizar la propiedad: ${err.message}` });
+  }
+};
 
 
 export const getProperties = async (

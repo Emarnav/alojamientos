@@ -11,12 +11,12 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
-import { getAbsoluteImageUrl } from "@/lib/utils";
+import { getAbsoluteImageUrls } from "@/lib/utils";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
 const ImageCarousel = ({ images }: { images: string[] }) => {
-  const [imgSrcs, setImgSrcs] = useState(images.map((img) => getAbsoluteImageUrl(img)));
+  const [imgSrcs, setImgSrcs] = useState(getAbsoluteImageUrls(images));
   const [isOpen, setIsOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 

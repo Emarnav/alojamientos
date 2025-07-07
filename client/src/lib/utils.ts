@@ -83,8 +83,23 @@ export const createNewUserInDatabase = async (
   return createUserResponse;
 };
 
-export const getAbsoluteImageUrl = (url: string) => {
-  if (!url) return "/placeholder.jpg"; 
-  if (url.startsWith("http")) return url; 
-  return `http://localhost:3001${url}`;
-};
+const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") || "http://localhost:3001";
+
+export function getAbsoluteImageUrls(images: string[] | string): string[] {
+  if (Array.isArray(images)) {
+    return images.map((img) => `${BASE_URL}${normalizePath(img)}`);
+  }
+
+  if (typeof images === "string") {
+    return images
+      .replace(/[{}]/g, "")
+      .split(",")
+      .map((img) => `${BASE_URL}${normalizePath(img)}`);
+  }
+
+  return [];
+}
+
+function normalizePath(path: string) {
+  return path.startsWith("/") ? path : `/${path}`;
+}

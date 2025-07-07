@@ -3,21 +3,32 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
+import { getAbsoluteImageUrls } from "@/lib/utils";
+
+interface ImagePreviewsProps {
+  images: string[] | string;
+}
+
 
 const ImagePreviews = ({ images }: ImagePreviewsProps) => {
+  // Asegura array de imágenes con URL completa
+  const imageArray = getAbsoluteImageUrls(images);
+
+
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const handlePrev = () => {
-    setCurrentImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+    setCurrentImageIndex((prev) => (prev === 0 ? imageArray.length - 1 : prev - 1));
   };
 
   const handleNext = () => {
-    setCurrentImageIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+    setCurrentImageIndex((prev) => (prev === imageArray.length - 1 ? 0 : prev + 1));
   };
 
   return (
     <div className="relative h-[450px] w-full">
-      {images.map((image, index) => (
+      {imageArray.map((image, index) => (
         <div
           key={image}
           className={`absolute inset-0 transition-opacity duration-500 ease-in-out ${
@@ -28,7 +39,7 @@ const ImagePreviews = ({ images }: ImagePreviewsProps) => {
             src={image}
             alt={`Imagen del alojamiento ${index + 1}`}
             fill
-            priority={index == 0}
+            priority={index === 0}
             className="object-cover cursor-pointer transition-transform duration-500 ease-in-out"
           />
         </div>
@@ -50,5 +61,10 @@ const ImagePreviews = ({ images }: ImagePreviewsProps) => {
     </div>
   );
 };
+
+// 🔧 Normaliza el path para evitar dobles barras: //uploads
+function normalizePath(path: string) {
+  return path.startsWith("/") ? path : `/${path}`;
+}
 
 export default ImagePreviews;
