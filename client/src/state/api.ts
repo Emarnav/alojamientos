@@ -1,6 +1,6 @@
 import { cleanParams, createNewUserInDatabase, withToast } from "@/lib/utils";
 import {
-  Solicitud,
+  Admin,
   Propietario,
   Alojamiento,
   Estudiante,

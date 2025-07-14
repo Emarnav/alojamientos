@@ -3,13 +3,13 @@
 import SettingsForm from "@/components/SettingsForm";
 import {
   useGetAuthUserQuery,
-  useUpdateTenantSettingsMutation,
+  useUpdateStudentSettingsMutation,
 } from "@/state/api";
 import React from "react";
 
 const TenantSettings = () => {
   const { data: authUser, isLoading } = useGetAuthUserQuery();
-  const [updateTenant] = useUpdateTenantSettingsMutation();
+  const [updateStudent] = useUpdateStudentSettingsMutation();
 
   if (isLoading) return <>Cargando...</>;
 
@@ -20,7 +20,7 @@ const TenantSettings = () => {
   };
 
   const handleSubmit = async (data: typeof initialData) => {
-    await updateTenant({
+    await updateStudent({
       cognitoId: authUser?.cognitoInfo?.userId,
       ...data,
     });

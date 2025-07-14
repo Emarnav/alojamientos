@@ -61,7 +61,7 @@ export const createTenant = async (req: Request, res: Response): Promise<void> =
 
 
 // Actualizar usuario
-export const updateTenant = async (req: Request, res: Response): Promise<void> => {
+export const updateStudent = async (req: Request, res: Response): Promise<void> => {
   try {
     const { cognitoId } = req.params;
     const { nombre, email, telefono } = req.body;
