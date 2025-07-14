@@ -88,7 +88,7 @@ const Card = ({
               <Eye className="w-5 h-5" />
             </Link>
             <Link
-              href={alojamientoLink}
+              href={alojamientoLink ?? "#"}
               className="text-gray-500 hover:text-blue-600"
               title="Editar alojamiento"
             >
