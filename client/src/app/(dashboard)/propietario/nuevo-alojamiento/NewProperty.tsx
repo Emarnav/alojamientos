@@ -68,10 +68,10 @@ const NewProperty = () => {
 
       const formData = new FormData();
 
-      // Añadir archivos de imagen
-      data.photoUrls.forEach((file: File) => {
+      data.photoUrls?.forEach((file: File) => {
         formData.append("photos", file);
       });
+
 
       // Añadir el resto de campos
       Object.entries(data).forEach(([key, value]) => {
