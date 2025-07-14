@@ -17,14 +17,20 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (authUser) {
       const userRole = authUser.userRole?.toLowerCase();
+
+      if (userRole === "admin") {
+        setIsLoading(false);
+        return;
+      }
+
       if (
-        (userRole === "propietario" && pathname.startsWith("/inquilinos")) ||
-        (userRole === "inquilino" && pathname.startsWith("/propietarios"))
+        (userRole === "propietario" && pathname.startsWith("/estudiante")) ||
+        (userRole === "estudiante" && pathname.startsWith("/propietario"))
       ) {
         router.push(
           userRole === "propietario"
-            ? "/propietarios/alojamientos"
-            : "/inquilinos/favoritos",
+            ? "/propietario/alojamientos"
+            : "/estudiante/favoritos",
           { scroll: false }
         );
       } else {

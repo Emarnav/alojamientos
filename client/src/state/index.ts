@@ -7,6 +7,7 @@ export interface FiltersState {
   tipoAlojamiento: string;
   disponibleDesde: string;
   amenities: string[];
+  includedExpenses: string[];
   rangoPrecio: [number, number] | [null, null];
   superficie: [number, number] | [null, null];
   coordinates: [number, number];
@@ -20,15 +21,16 @@ interface InitialStateTypes {
 
 export const initialState: InitialStateTypes = {
   filters: {
-    location: "Valencia",
+    location: "",
     habitaciones: "any",
     banos: "any",
     tipoAlojamiento: "any",
     disponibleDesde: "any",
     amenities: [],
+    includedExpenses: [],
     rangoPrecio: [null, null],
     superficie: [null, null],
-    coordinates: [-0.39, 39.546],
+    coordinates: [0, 0],
   },
   isFiltersFullOpen: false,
   viewMode: "grid",

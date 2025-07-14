@@ -23,7 +23,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     const userRole = authUser.userRole?.toLowerCase();
     
     if (userRole === "propietario" && pathname === "/") {
-      router.push("/propietarios/alojamientos", { scroll: false });
+      router.push("/propietario/alojamientos", { scroll: false });
     } else {
       setIsLoading(false); 
     }
@@ -32,7 +32,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   if (authLoading || isLoading) return <>Cargando...</>;
 
   return (
-    <div className="h-full w-full">
+    <div className="container mx-auto">
       <Navbar />
       <main
         className={`h-full flex w-full flex-col`}

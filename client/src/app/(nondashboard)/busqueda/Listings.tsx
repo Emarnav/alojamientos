@@ -1,39 +1,36 @@
 import {
   useAddFavoritePropertyMutation,
   useGetAuthUserQuery,
-  useGetPropertiesQuery,
   useGetTenantQuery,
   useRemoveFavoritePropertyMutation,
 } from "@/state/api";
 import { useAppSelector } from "@/state/redux";
 import { Alojamiento } from "@/types/prismaTypes";
 import Card from "@/components/Card";
-import React from "react";
 import CardCompact from "@/components/CardCompact";
+import React from "react";
+import { ListingsProps } from "@/types";
 
-const Listings = () => {
+const Listings = ({ alojamientos, isLoading, isError }: ListingsProps) => {
   const { data: authUser } = useGetAuthUserQuery();
-  const { data: inquilino } = useGetTenantQuery(
+  const isEstudiante = authUser?.userRole === "estudiante";
+
+  const { data: estudiante } = useGetTenantQuery(
     authUser?.cognitoInfo?.userId || "",
     {
-      skip: !authUser?.cognitoInfo?.userId,
+      skip: !authUser?.cognitoInfo?.userId || !isEstudiante,
     }
   );
+
   const [addFavorite] = useAddFavoritePropertyMutation();
   const [removeFavorite] = useRemoveFavoritePropertyMutation();
   const viewMode = useAppSelector((state) => state.global.viewMode);
   const filters = useAppSelector((state) => state.global.filters);
 
-  const {
-    data: alojamientos,
-    isLoading,
-    isError,
-  } = useGetPropertiesQuery(filters);
-
   const handleFavoriteToggle = async (propertyId: number) => {
-    if (!authUser) return;
+    if (!authUser || authUser.userRole !== "estudiante") return;
 
-    const isFavorite = inquilino?.favoritos?.some(
+    const isFavorite = estudiante?.favoritos?.some(
       (fav: Alojamiento) => fav.id === propertyId
     );
 
@@ -63,18 +60,18 @@ const Listings = () => {
       </h3>
       <div className="flex">
         <div className="p-4 w-full">
-          {alojamientos?.map((alojamiento) =>
+          {alojamientos.map((alojamiento) =>
             viewMode === "grid" ? (
               <Card
                 key={alojamiento.id}
                 alojamiento={alojamiento}
                 isFavorite={
-                  inquilino?.favoritos?.some(
+                  estudiante?.favoritos?.some(
                     (fav: Alojamiento) => fav.id === alojamiento.id
                   ) || false
                 }
                 onFavoriteToggle={() => handleFavoriteToggle(alojamiento.id)}
-                showFavoriteButton={!!authUser}
+                showFavoriteButton={authUser?.userRole === "estudiante"}
                 alojamientoLink={`/alojamientos/${alojamiento.id}`}
               />
             ) : (
@@ -82,12 +79,12 @@ const Listings = () => {
                 key={alojamiento.id}
                 alojamiento={alojamiento}
                 isFavorite={
-                  inquilino?.favoritos?.some(
+                  estudiante?.favoritos?.some(
                     (fav: Alojamiento) => fav.id === alojamiento.id
                   ) || false
                 }
                 onFavoriteToggle={() => handleFavoriteToggle(alojamiento.id)}
-                showFavoriteButton={!!authUser}
+                showFavoriteButton={authUser?.userRole === "estudiante"}
                 alojamientoLink={`/alojamientos/${alojamiento.id}`}
               />
             )

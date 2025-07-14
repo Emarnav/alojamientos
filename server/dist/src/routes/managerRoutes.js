@@ -5,9 +5,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const managerControllers_1 = require("../controllers/managerControllers");
+const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
-router.get("/:cognitoId", managerControllers_1.getManager);
-router.put("/:cognitoId", managerControllers_1.updateManager);
-router.get("/:cognitoId/alojamientos", managerControllers_1.getManagerProperties);
-router.post("/", managerControllers_1.createManager);
+// Rutas protegidas: solo usuarios con tipo 'propietario' pueden acceder
+router.get("/:cognitoId", (0, authMiddleware_1.authMiddleware)(["propietario"]), managerControllers_1.getManager);
+router.put("/:cognitoId", (0, authMiddleware_1.authMiddleware)(["propietario"]), managerControllers_1.updateManager);
+router.get("/:cognitoId/alojamientos", (0, authMiddleware_1.authMiddleware)(["propietario"]), managerControllers_1.getManagerProperties);
+// Ruta abierta para registro (sin necesidad de que exista en la BD todavía)
+router.post("/", authMiddleware_1.extractUserFromToken, managerControllers_1.createManager);
 exports.default = router;

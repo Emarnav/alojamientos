@@ -1,6 +1,6 @@
 import { LucideIcon } from "lucide-react";
 import { AuthUser } from "aws-amplify/auth";
-import { Manager, Tenant, Property, Application, Solicitud } from "./prismaTypes";
+import { Alojamiento, Usuario, Solicitud } from "@prisma/client";
 import { MotionProps as OriginalMotionProps } from "framer-motion";
 
 declare module "framer-motion" {
@@ -82,11 +82,13 @@ declare global {
     images: string[];
   }
 
-  interface PropertyDetailsProps {
-    alojamiento: Alojamiento;
+  interface ListingsProps {
+    alojamientos?: Alojamiento[];
+    isLoading: boolean;
+    isError: boolean;
   }
-
-  interface PropertyOverviewProps {
+  
+  interface PropertyDetailsProps {
     alojamiento: Alojamiento;
   }
 
@@ -96,20 +98,21 @@ declare global {
 
   interface ApplicationCardProps {
     solicitud: Solicitud;
-    userType: "propietario" | "inquilino";
+    userType: "propietario" | "estudiante";
     children: React.ReactNode;
   }
 
   interface CardProps {
     alojamiento: Alojamiento;
-    isFavorite: boolean;
-    onFavoriteToggle: () => void;
+    isFavorite?: boolean;
+    onFavoriteToggle?: () => void;
     showFavoriteButton?: boolean;
     alojamientoLink?: string;
+    context?: "public" | "admin"; 
   }
 
   interface CardCompactProps {
-    alojamiento: Property;
+    alojamiento: Alojamiento;
     isFavorite: boolean;
     onFavoriteToggle: () => void;
     showFavoriteButton?: boolean;
@@ -126,19 +129,19 @@ declare global {
   }
 
   interface AppSidebarProps {
-    userType: "propietario" | "inquilino";
+    userType: "propietario" | "estudiante" | "admin";
   }
 
   interface SettingsFormProps {
     initialData: SettingsFormData;
     onSubmit: (data: SettingsFormData) => Promise<void>;
-    userType: "propietario" | "inquilino";
+    userType: "propietario" | "estudiante" | "admin";
   }
 
   interface User {
     cognitoInfo: AuthUser;
-    userInfo: Inquilino | Propietario;
-    userRole: JsonObject | JsonPrimitive | JsonArray;
+    userInfo: Usuario;
+    userRole: "estudiante" | "propietario" | "admin";
   }
 }
 

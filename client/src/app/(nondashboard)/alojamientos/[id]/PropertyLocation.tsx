@@ -1,4 +1,3 @@
-import { useGetPropertyQuery } from "@/state/api";
 import { Compass, MapPin } from "lucide-react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -17,16 +16,16 @@ const PropertyLocation = ({ alojamiento }: PropertyDetailsProps) => {
       container: mapContainerRef.current!,
       style: "mapbox://styles/emarnav/cm7n3xzne002001qu0mnw6mxb",
       center: [
-        alojamiento.location.coordinates.longitude,
-        alojamiento.location.coordinates.latitude,
+        alojamiento.ubicacion.coordinates.longitude,
+        alojamiento.ubicacion.coordinates.latitude,
       ],
       zoom: 14,
     });
 
     const marker = new mapboxgl.Marker()
       .setLngLat([
-        alojamiento.location.coordinates.longitude,
-        alojamiento.location.coordinates.latitude,
+        alojamiento.ubicacion.coordinates.longitude,
+        alojamiento.ubicacion.coordinates.latitude,
       ])
       .addTo(map);
 
@@ -51,12 +50,12 @@ const PropertyLocation = ({ alojamiento }: PropertyDetailsProps) => {
           <MapPin className="w-4 h-4 mr-1 text-gray-700" />
           Dirección:
           <span className="ml-2 font-semibold text-gray-700">
-            {alojamiento.location?.address || "No disponible"}
+            {alojamiento.ubicacion?.direccion || "No disponible"}
           </span>
         </div>
         <a
           href={`https://maps.google.com/?q=${encodeURIComponent(
-            alojamiento.location?.address || ""
+            alojamiento.ubicacion?.direccion || ""
           )}`}
           target="_blank"
           rel="noopener noreferrer"

@@ -1,10 +1,14 @@
 import * as z from "zod";
-import { PropertyTypeEnum } from "@/lib/constants";
 
 export const propertySchema = z.object({
   nombre: z.string().min(1, "El nombre es necesario"),
   descripcion: z.string().min(1, "La descripción es necesaria"),
-  precio: z.coerce.number().positive().min(0).int(),
+  dirigidoA: z.enum([
+    "Solo Chicas",
+    "Solo Chicos",
+    "Mixto",
+  ]),  
+  precio: z.coerce.number().positive().min(0),
   hayTelevision: z.boolean(),
   hayTelefono: z.boolean(),
   hayInternet: z.boolean(),
@@ -29,18 +33,28 @@ export const propertySchema = z.object({
   gasIncluido: z.boolean(),
   electricidadIncluido: z.boolean(),
   internetIncluido: z.boolean(),
-  photoUrls: z
-    .array(z.instanceof(File))
-    .min(1, "Se requiere al menos una foto"),
-  habitaciones: z.coerce.number().positive().min(0).max(10).int(),
-  banos: z.coerce.number().positive().min(0).max(10).int(),
+  photoUrls: z.array(z.any()).optional(),
+
+  habitaciones: z.coerce.number().positive().min(0).int(),
+  banos: z.coerce.number().positive().min(0).int(),
   plazasLibres: z.coerce.number().positive().min(0).int(),
   superficie: z.coerce.number().int().positive(),
-  tipoAlojamiento: z.nativeEnum(PropertyTypeEnum),
+  tipoAlojamiento: z.enum([
+    "Colegio Mayor",
+    "Piso",
+    "Piso Compartido",
+    "Residencia Familiar",
+    "Residencia Universitaria"
+  ]),
   direccion: z.string().min(1, "La dirección es necesaria"),
   localidad: z.string().min(1, "La localidad es necesaria"),
   provincia: z.string().min(1, "La provincia es necesaria"),
-  codigoPostal: z.string().min(1, "El código postal es necesario")
+  codigoPostal: z.string().min(1, "El código postal es necesario"),
+  infoExtra: z.string().optional(),
+  esDestacado: z.boolean().optional(),
+  motivoRechazo: z.string().optional(),
+  estado: z.enum(["Pendiente", "Aprobado", "Rechazado"]).default("Pendiente"),
+
 });
 
 export type PropertyFormData = z.infer<typeof propertySchema>;

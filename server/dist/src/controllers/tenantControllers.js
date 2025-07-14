@@ -1,4 +1,5 @@
 "use strict";
+// CONTROLADORES DE USUARIO ESTUDIANTE CENTRALIZADO
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -13,154 +14,166 @@ exports.removeFavoriteProperty = exports.addFavoriteProperty = exports.getCurren
 const client_1 = require("@prisma/client");
 const wkt_1 = require("@terraformer/wkt");
 const prisma = new client_1.PrismaClient();
+// Obtener usuario por cognitoId
 const getTenant = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { cognitoId } = req.params;
-        const inquilino = yield prisma.inquilino.findUnique({
+        const usuario = yield prisma.usuario.findUnique({
             where: { cognitoId },
-            include: {
-                favoritos: true,
-            },
+            include: { alojamientosFavoritos: true },
         });
-        if (inquilino) {
-            res.json(inquilino);
+        if (!usuario || usuario.tipo !== "Estudiante") {
+            res.status(404).json({ message: "No se encontró el estudiante" });
+            return;
         }
-        else {
-            res.status(404).json({ message: "No se encontró el inquilino not found" });
-        }
+        res.json(usuario);
     }
     catch (error) {
-        res
-            .status(500)
-            .json({ message: `Error al recuperar el inquilino: ${error.message}` });
+        res.status(500).json({ message: `Error al recuperar el estudiante: ${error.message}` });
     }
 });
 exports.getTenant = getTenant;
+// Crear estudiante
 const createTenant = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { cognitoId, nombre, email, telefono } = req.body;
-        const inquilino = yield prisma.inquilino.create({
+        const { nombre } = req.body;
+        const { cognitoId, email } = req.user;
+        if (!nombre || !email) {
+            res.status(400).json({ message: "Faltan datos obligatorios para crear el estudiante." });
+            return;
+        }
+        const existingUser = yield prisma.usuario.findUnique({ where: { cognitoId } });
+        if (existingUser) {
+            res.status(409).json({ message: "El usuario ya existe." });
+            return;
+        }
+        const usuario = yield prisma.usuario.create({
             data: {
                 cognitoId,
-                nombre,
                 email,
-                telefono,
+                nombre,
+                tipo: "Estudiante",
             },
         });
-        res.status(201).json(inquilino);
+        res.status(201).json(usuario);
     }
     catch (error) {
-        res
-            .status(500)
-            .json({ message: `Error al crear al inquilino: ${error.message}` });
+        res.status(500).json({ message: `Error al crear el estudiante: ${error.message}` });
     }
 });
 exports.createTenant = createTenant;
+// Actualizar usuario
 const updateTenant = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { cognitoId } = req.params;
         const { nombre, email, telefono } = req.body;
-        const updateTenant = yield prisma.inquilino.update({
+        const updated = yield prisma.usuario.update({
             where: { cognitoId },
-            data: {
-                nombre,
-                email,
-                telefono,
-            },
+            data: { nombre, email, telefono },
         });
-        res.json(updateTenant);
+        res.json(updated);
     }
     catch (error) {
-        res
-            .status(500)
-            .json({ message: `Error actualizando el inquilino: ${error.message}` });
+        res.status(500).json({ message: `Error actualizando el estudiante: ${error.message}` });
     }
 });
 exports.updateTenant = updateTenant;
+// Obtener alojamientos favoritos con coordenadas
 const getCurrentResidences = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { cognitoId } = req.params;
-        const properties = yield prisma.alojamiento.findMany({
-            where: { inquilinos: { some: { cognitoId } } },
+        const usuario = yield prisma.usuario.findUnique({
+            where: { cognitoId },
+        });
+        if (!usuario || usuario.tipo !== "Estudiante") {
+            res.status(404).json({ message: "Estudiante no encontrado" });
+            return;
+        }
+        const properties = yield prisma.usuario.findUnique({
+            where: { id: usuario.id },
             include: {
-                location: true,
+                alojamientosFavoritos: {
+                    include: { ubicacion: true },
+                },
             },
         });
-        const residencesWithFormattedLocation = yield Promise.all(properties.map((property) => __awaiter(void 0, void 0, void 0, function* () {
+        if (!properties) {
+            res.status(404).json({ message: "No se encontraron alojamientos" });
+            return;
+        }
+        const formatted = yield Promise.all(properties.alojamientosFavoritos.map((property) => __awaiter(void 0, void 0, void 0, function* () {
             var _a;
-            const coordinates = yield prisma.$queryRaw `SELECT ST_asText(coordinates) as coordinates from "Location" where id = ${property.location.id}`;
+            const coordinates = yield prisma.$queryRaw `SELECT ST_asText(coordinates) as coordinates FROM "Ubicacion" WHERE id = ${property.ubicacion.id}`;
             const geoJSON = (0, wkt_1.wktToGeoJSON)(((_a = coordinates[0]) === null || _a === void 0 ? void 0 : _a.coordinates) || "");
-            const longitude = geoJSON.coordinates[0];
-            const latitude = geoJSON.coordinates[1];
-            return Object.assign(Object.assign({}, property), { location: Object.assign(Object.assign({}, property.location), { coordinates: {
-                        longitude,
-                        latitude,
+            return Object.assign(Object.assign({}, property), { ubicacion: Object.assign(Object.assign({}, property.ubicacion), { coordinates: {
+                        longitude: geoJSON.coordinates[0],
+                        latitude: geoJSON.coordinates[1],
                     } }) });
         })));
-        res.json(residencesWithFormattedLocation);
+        res.json(formatted);
     }
-    catch (err) {
-        res
-            .status(500)
-            .json({ message: `Error al recuperar los alojamientos del propietario: ${err.message}` });
+    catch (error) {
+        res.status(500).json({ message: `Error al recuperar alojamientos: ${error.message}` });
     }
 });
 exports.getCurrentResidences = getCurrentResidences;
+// Añadir favorito
 const addFavoriteProperty = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { cognitoId, propertyId } = req.params;
-        const inquilino = yield prisma.inquilino.findUnique({
+        const usuario = yield prisma.usuario.findUnique({
             where: { cognitoId },
-            include: { favoritos: true },
+            include: { alojamientosFavoritos: true },
         });
-        if (!inquilino) {
-            res.status(404).json({ message: "Inquilino no encontrado" });
+        if (!usuario || usuario.tipo !== "Estudiante") {
+            res.status(404).json({ message: "Estudiante no encontrado" });
             return;
         }
-        const propertyIdNumber = Number(propertyId);
-        const existingFavorites = inquilino.favoritos || [];
-        if (!existingFavorites.some((fav) => fav.id === propertyIdNumber)) {
-            const updatedTenant = yield prisma.inquilino.update({
-                where: { cognitoId },
-                data: {
-                    favoritos: {
-                        connect: { id: propertyIdNumber },
-                    },
+        const alreadyFavorite = usuario.alojamientosFavoritos.some((fav) => fav.id === Number(propertyId));
+        if (alreadyFavorite) {
+            res.status(409).json({ message: "Ya está en favoritos" });
+            return;
+        }
+        const updated = yield prisma.usuario.update({
+            where: { id: usuario.id },
+            data: {
+                alojamientosFavoritos: {
+                    connect: { id: Number(propertyId) },
                 },
-                include: { favoritos: true },
-            });
-            res.json(updatedTenant);
-        }
-        else {
-            res.status(409).json({ message: "El alojamiento ya está añadido a favoritos" });
-        }
+            },
+            include: { alojamientosFavoritos: true },
+        });
+        res.json(updated);
     }
     catch (error) {
-        res
-            .status(500)
-            .json({ message: `Error al añadir el alojamiento a favoritos: ${error.message}` });
+        res.status(500).json({ message: `Error al añadir favorito: ${error.message}` });
     }
 });
 exports.addFavoriteProperty = addFavoriteProperty;
+// Eliminar favorito
 const removeFavoriteProperty = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { cognitoId, propertyId } = req.params;
-        const propertyIdNumber = Number(propertyId);
-        const updatedTenant = yield prisma.inquilino.update({
+        const usuario = yield prisma.usuario.findUnique({
             where: { cognitoId },
+        });
+        if (!usuario || usuario.tipo !== "Estudiante") {
+            res.status(404).json({ message: "Estudiante no encontrado" });
+            return;
+        }
+        const updated = yield prisma.usuario.update({
+            where: { id: usuario.id },
             data: {
-                favoritos: {
-                    disconnect: { id: propertyIdNumber },
+                alojamientosFavoritos: {
+                    disconnect: { id: Number(propertyId) },
                 },
             },
-            include: { favoritos: true },
+            include: { alojamientosFavoritos: true },
         });
-        res.json(updatedTenant);
+        res.json(updated);
     }
-    catch (err) {
-        res
-            .status(500)
-            .json({ message: `Error al eliminar el alojamiento de favoritos: ${err.message}` });
+    catch (error) {
+        res.status(500).json({ message: `Error al eliminar favorito: ${error.message}` });
     }
 });
 exports.removeFavoriteProperty = removeFavoriteProperty;

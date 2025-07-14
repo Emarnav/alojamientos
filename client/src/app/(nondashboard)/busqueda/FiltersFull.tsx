@@ -4,11 +4,11 @@ import { usePathname, useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { debounce } from "lodash";
-import { cleanParams, cn, formatEnumString } from "@/lib/utils";
+import { cleanParams, cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
-import { AmenityIcons, PropertyTypeIcons } from "@/lib/constants";
+import { AmenityIcons, PropertyTypeIcons, IncludedExpenseIcons } from "@/lib/constants";
 import { Slider } from "@/components/ui/slider";
 import {
   Select,
@@ -62,6 +62,14 @@ const FiltersFull = () => {
         : [...prev.amenities, amenity],
     }));
   };
+  const handleIncludedExpenseChange = (expense: keyof typeof IncludedExpenseIcons) => {
+    setLocalFilters((prev) => ({
+      ...prev,
+      includedExpenses: prev.includedExpenses.includes(expense)
+        ? prev.includedExpenses.filter((e) => e !== expense)
+        : [...prev.includedExpenses, expense],
+    }));
+  };
 
   const handleLocationSearch = async () => {
     try {
@@ -90,7 +98,7 @@ const FiltersFull = () => {
   return (
     <div className="bg-white rounded-lg px-4 h-full overflow-auto pb-10">
       <div className="flex flex-col space-y-6">
-        {/* Location */}
+        {/* Ubicación */}
         <div>
           <h4 className="font-bold mb-2">Ubicación</h4>
           <div className="flex items-center">
@@ -114,7 +122,7 @@ const FiltersFull = () => {
           </div>
         </div>
 
-        {/* Property Type */}
+        {/* Tipo de alojamiento */}
         <div>
           <h4 className="font-bold mb-2">Tipo de alojamiento</h4>
           <div className="grid grid-cols-2 gap-4">
@@ -141,7 +149,7 @@ const FiltersFull = () => {
           </div>
         </div>
 
-        {/* Price Range */}
+        {/* Rango de precios */}
         <div>
           <h4 className="font-bold mb-2">Rango de precios (mensual)</h4>
           <Slider
@@ -165,7 +173,7 @@ const FiltersFull = () => {
           </div>
         </div>
 
-        {/* Beds and Baths */}
+        {/* Habitaciones */}
         <div className="flex gap-4">
           <div className="flex-1">
             <h4 className="font-bold mb-2">Habitaciones</h4>
@@ -233,9 +241,9 @@ const FiltersFull = () => {
           </div>
         </div>
 
-        {/* Amenities */}
+        {/* Características */}
         <div>
-          <h4 className="font-bold mb-2">Amenities</h4>
+          <h4 className="font-bold mb-2">Características</h4>
           <div className="flex flex-wrap gap-2">
             {Object.entries(AmenityIcons).map(([amenity, Icon]) => (
               <div
@@ -250,16 +258,42 @@ const FiltersFull = () => {
               >
                 <Icon className="w-5 h-5 hover:cursor-pointer" />
                 <Label className="hover:cursor-pointer">
-                  {formatEnumString(amenity)}
+                  {amenity}
                 </Label>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Available From */}
+        {/* Gastos Incluidos */}
         <div>
-          <h4 className="font-bold mb-2">Available From</h4>
+          <h4 className="font-bold mb-2">Gastos Incluidos</h4>
+          <div className="flex flex-wrap gap-2">
+          {Object.entries(IncludedExpenseIcons).map(([label, Icon]) => {
+            const isActive = localFilters.includedExpenses.includes(label as keyof typeof IncludedExpenseIcons);
+
+            return (
+              <div
+                key={label}
+                className={cn(
+                  "flex items-center space-x-2 p-2 border rounded-lg hover:cursor-pointer",
+                  isActive ? "border-black" : "border-gray-200"
+                )}
+                onClick={() => handleIncludedExpenseChange(label as keyof typeof IncludedExpenseIcons)}
+              >
+                <Icon className="w-5 h-5 hover:cursor-pointer" />
+                <Label className="hover:cursor-pointer">{label}</Label>
+              </div>
+            );
+          })}
+
+          </div>
+        </div>
+
+
+        {/* Disponible Desde */}
+        <div>
+          <h4 className="font-bold mb-2">Disponible Desde</h4>
           <Input
             type="date"
             value={

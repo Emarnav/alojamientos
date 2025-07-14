@@ -19,7 +19,7 @@ const ApplicationCard = ({
       : "bg-yellow-500";
 
   const contactPerson =
-    userType === "propietario" ? solicitud.inquilino : solicitud.propietario;
+    userType === "propietario" ? solicitud.estudiante : solicitud.propietario;
 
   return (
     <div className="border rounded-xl overflow-hidden shadow-sm bg-white mb-4">
@@ -89,7 +89,7 @@ const ApplicationCard = ({
         <div className="flex flex-col justify-start gap-5 w-full lg:basis-3/12 lg:h-48 py-2">
           <div>
             <div className="text-lg font-semibold">
-              {userType === "propietario" ? "Inquilino" : "Propietario"}
+              {userType === "propietario" ? "estudiante" : "Propietario"}
             </div>
             <hr className="mt-3" />
           </div>

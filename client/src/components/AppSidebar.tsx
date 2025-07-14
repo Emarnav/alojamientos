@@ -16,36 +16,34 @@ import {
   Home,
   Menu,
   Settings,
+  Users,
   X,
 } from "lucide-react";
 import { NAVBAR_HEIGHT } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
-const AppSidebar = ({ userType }: AppSidebarProps) => {
+const AppSidebar = ({ userType }: { userType: string }) => {
   const pathname = usePathname();
   const { toggleSidebar, open } = useSidebar();
 
   const navLinks =
     userType === "propietario"
       ? [
-          { icon: Building, label: "Alojamientos", href: "/propietarios/alojamientos" },
-          {
-            icon: FileText,
-            label: "Solicitudes",
-            href: "/propietarios/solicitudes",
-          },
-          { icon: Settings, label: "Configuracion", href: "/propietarios/configuracion" },
+          { icon: Building, label: "Alojamientos", href: "/propietario/alojamientos" },
+          { icon: FileText, label: "Solicitudes", href: "/propietario/solicitudes" },
+          { icon: Settings, label: "Configuración", href: "/propietario/configuracion" },
+        ]
+      : userType === "estudiante"
+      ? [
+          { icon: Heart, label: "Favoritos", href: "/estudiante/favoritos" },
+          { icon: FileText, label: "Solicitudes", href: "/estudiante/solicitudes" },
+          { icon: Settings, label: "Configuración", href: "/estudiante/configuracion" },
         ]
       : [
-          { icon: Heart, label: "Favoritos", href: "/inquilinos/favoritos" },
-          {
-            icon: FileText,
-            label: "Solicitudes",
-            href: "/inquilinos/solicitudes",
-          },
-          { icon: Home, label: "Alojamientos", href: "/inquilinos/alojamientos" },
-          { icon: Settings, label: "Configuracion", href: "/inquilinos/configuracion" },
+          // ADMIN
+          { icon: Building, label: "Alojamientos", href: "/admin/alojamientos" },
+          { icon: Settings, label: "Configuración", href: "/admin/configuracion" },
         ];
 
   return (
@@ -68,8 +66,8 @@ const AppSidebar = ({ userType }: AppSidebarProps) => {
             >
               {open ? (
                 <>
-                  <h1 className="text-xl font-bold text-gray-800">
-                    {userType === "propietario" ? "Propietario" : "Inquilino"}
+                  <h1 className="text-xl font-bold text-gray-800 capitalize">
+                    {userType}
                   </h1>
                   <button
                     className="hover:bg-gray-100 p-2 rounded-md"

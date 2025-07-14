@@ -25,7 +25,7 @@ const Navbar = () => {
   const pathname = usePathname();
 
   const isDashboardPage =
-    pathname.includes("/propietarios") || pathname.includes("/inquilinos");
+    pathname.includes("/propietario") || pathname.includes("/estudiante");
 
   const handleSignOut = async () => {
     await signOut();
@@ -72,7 +72,7 @@ const Navbar = () => {
               onClick={() =>
                 router.push(
                   authUser.userRole?.toLowerCase() === "propietario"
-                    ? "/propietarios/nuevo-alojamiento"
+                    ? "/propietario/nuevo-alojamiento"
                     : "/busqueda"
                 )
               }
@@ -94,68 +94,45 @@ const Navbar = () => {
           )}
         </div>
         {!isDashboardPage && (
-          <p className="text-primary-200 hidden md:block">
-            Discover your perfect rental apartment with our advanced search
-          </p>
+          <div className="hidden md:block">
+            <Link href="/busqueda">
+              <Button
+                variant="outline"
+                className="text-white border-white bg-transparent hover:bg-white hover:text-primary-700 rounded-lg"
+              >
+                Buscar propiedades
+              </Button>
+            </Link>
+          </div>
         )}
         <div className="flex items-center gap-5">
           {authUser ? (
             <>
-              <div className="relative hidden md:block">
-                <MessageCircle className="w-6 h-6 cursor-pointer text-primary-200 hover:text-primary-400" />
-                <span className="absolute top-0 right-0 w-2 h-2 bg-secondary-700 rounded-full"></span>
-              </div>
-              <div className="relative hidden md:block">
-                <Bell className="w-6 h-6 cursor-pointer text-primary-200 hover:text-primary-400" />
-                <span className="absolute top-0 right-0 w-2 h-2 bg-secondary-700 rounded-full"></span>
-              </div>
+              <Button
+                variant="ghost"
+                className="text-white hover:text-primary-700"
+                onClick={() => {
+                  const role = authUser.userRole?.toLowerCase();
+                  if (role === "propietario") {
+                    router.push("/propietario/alojamientos");
+                  } else if (role === "estudiante") {
+                    router.push("/estudiante/solicitudes");
+                  } else if (role === "admin") {
+                    router.push("/admin/alojamientos");
+                  }
+                }}
+              >
+                Panel de control
+              </Button>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center gap-2 focus:outline-none">
-                  <Avatar>
-                    <AvatarImage src={authUser.userInfo?.image} />
-                    <AvatarFallback className="bg-primary-600">
-                      {authUser.userRole?.[0].toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <p className="text-primary-200 hidden md:block">
-                    {authUser.userInfo?.name}
-                  </p>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-white text-primary-700">
-                  <DropdownMenuItem
-                    className="cursor-pointer hover:!bg-primary-700 hover:!text-primary-100 font-bold"
-                    onClick={() =>
-                      router.push(
-                        authUser.userRole?.toLowerCase() === "propietario"
-                          ? "/propietarios/alojamientos"
-                          : "/inquilinos/favoritos",
-                        { scroll: false }
-                      )
-                    }
-                  >
-                    Panel de control
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-primary-200" />
-                  <DropdownMenuItem
-                    className="cursor-pointer hover:!bg-primary-700 hover:!text-primary-100"
-                    onClick={() =>
-                      router.push(
-                        `/${authUser.userRole?.toLowerCase()}s/settings`,
-                        { scroll: false }
-                      )
-                    }
-                  >
-                    Configuración
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    className="cursor-pointer hover:!bg-primary-700 hover:!text-primary-100"
-                    onClick={handleSignOut}
-                  >
-                    Cerrar sesión
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Button
+                variant="ghost"
+                className="text-white hover:text-primary-700"
+                onClick={handleSignOut}
+              >
+                Cerrar sesión
+              </Button>
+
             </>
           ) : (
             <>

@@ -11,8 +11,8 @@ const PropertyOverview = ({ alojamiento }: PropertyOverviewProps) => {
         <div className="flex justify-between items-center">
           <span className="flex items-center text-gray-500">
             <MapPin className="w-4 h-4 mr-1 text-gray-700" />
-            {alojamiento.location?.city}, {alojamiento.location?.state},{" "}
-            {alojamiento.location?.country}
+            {alojamiento.ubicacion?.direccion},{alojamiento.ubicacion?.ciudad} {alojamiento.ubicacion?.codigoPostal}, {alojamiento.ubicacion?.provincia},{" "}
+            {alojamiento.ubicacion?.pais}
           </span>
           {alojamiento.esDestacado && (
             <div className="flex justify-between items-center gap-3">

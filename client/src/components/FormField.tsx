@@ -85,6 +85,7 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
           <Textarea
             placeholder={placeholder}
             {...field}
+            disabled={disabled}
             rows={3}
             className={`border-gray-200 p-4 ${inputClassName}`}
           />
@@ -95,8 +96,10 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
             value={field.value || (initialValue as string)}
             defaultValue={field.value || (initialValue as string)}
             onValueChange={field.onChange}
+            disabled={disabled}
           >
             <SelectTrigger
+              disabled={disabled}
               className={`w-full border-gray-200 p-4 ${inputClassName}`}
             >
               <SelectValue placeholder={placeholder} />
@@ -121,6 +124,7 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
               checked={field.value}
               onCheckedChange={field.onChange}
               id={name}
+              disabled={disabled}
               className={`text-customgreys-dirtyGrey ${inputClassName}`}
             />
             <FormLabel htmlFor={name} className={labelClassName}>
@@ -133,9 +137,10 @@ export const CustomFormField: React.FC<FormFieldProps> = ({
           <FilePond
             className={`${inputClassName}`}
             onupdatefiles={(fileItems) => {
-              const files = fileItems.map((fileItem) => fileItem.file);
-              field.onChange(files);
+              const files = fileItems.map(item => item.file);
+              field.onChange(files); // asegura que `File[]` puro
             }}
+
             allowMultiple={true}
             labelIdle={`Arrastre y suelte sus imágenes o <span class="filepond--label-action">suba un fichero</span>`}
             credits={false}

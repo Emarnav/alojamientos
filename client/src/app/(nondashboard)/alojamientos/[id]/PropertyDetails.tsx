@@ -1,32 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AmenityIcons } from "@/lib/constants";
-import { formatEnumString } from "@/lib/utils";
-import { useGetPropertyQuery } from "@/state/api";
+import { AmenityIcons, AmenityEnum } from "@/lib/constants";
 import React from "react";
-import { Tv, Wifi, Phone, Sun, ArrowUpFromLine, Car, Utensils, ChefHat, Microwave, Refrigerator, WashingMachine, Wind, UserCheck, Sofa, Flame, Snowflake, Droplets, Waves, Users, Dumbbell, HelpCircle } from "lucide-react";
 
-const amenitiesList = [
-  { key: "hayTelevision", label: "Televisión", icon: Tv },
-  { key: "hayTelefono", label: "Teléfono", icon: Phone },
-  { key: "hayInternet", label: "Internet", icon: Wifi },
-  { key: "hayTerraza", label: "Terraza", icon: Sun },
-  { key: "hayAscensor", label: "Ascensor", icon: ArrowUpFromLine },
-  { key: "hayGaraje", label: "Garaje", icon: Car },
-  { key: "hayLavavajillas", label: "Lavavajillas", icon: Utensils },
-  { key: "hayHorno", label: "Horno", icon: ChefHat },
-  { key: "hayMicroondas", label: "Microondas", icon: Microwave },
-  { key: "hayNevera", label: "Nevera", icon: Refrigerator },
-  { key: "hayLavadora", label: "Lavadora", icon: WashingMachine },
-  { key: "haySecadora", label: "Secadora", icon: Wind },
-  { key: "hayPortero", label: "Portero", icon: UserCheck },
-  { key: "hayMuebles", label: "Amueblado", icon: Sofa },
-  { key: "hayCalefaccion", label: "Calefacción", icon: Flame },
-  { key: "hayAireAcondicionado", label: "Aire acondicionado", icon: Snowflake },
-  { key: "hayGas", label: "Gas", icon: Droplets },
-  { key: "hayPiscina", label: "Piscina", icon: Waves },
-  { key: "hayZonaComunitaria", label: "Zona comunitaria", icon: Users },
-  { key: "hayGimnasio", label: "Gimnasio", icon: Dumbbell },
-];
 const PropertyDetails = ({ alojamiento }: PropertyDetailsProps) => {
 
   return (
@@ -35,19 +10,19 @@ const PropertyDetails = ({ alojamiento }: PropertyDetailsProps) => {
       <div>
       <h2 className="text-xl font-semibold my-3">Servicios del alojamiento</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-        {amenitiesList
-        .filter((item) => alojamiento[item.key])
-        .map(({ key, label, icon: Icon }) => (
-          <div
-          key={key}
-          className="flex flex-col items-center border rounded-xl py-8 px-4"
-          >
-          <Icon className="w-8 h-8 mb-2 text-gray-700" />
-          <span className="text-sm text-center text-gray-700">
-            {label}
-          </span>
-          </div>
-        ))}
+      {Object.entries(AmenityEnum)
+        .filter(([key]) => alojamiento[key])
+        .map(([key, label]) => {
+          const Icon = AmenityIcons[label as AmenityEnum];
+          return (
+            <div key={key} className="flex flex-col items-center border rounded-xl py-8 px-4">
+              <Icon className="w-8 h-8 mb-2 text-gray-700" />
+              <span className="text-sm text-center text-gray-700">{label}</span>
+            </div>
+          );
+        })}
+
+
       </div>
       </div>
 
@@ -57,9 +32,9 @@ const PropertyDetails = ({ alojamiento }: PropertyDetailsProps) => {
         Tarifas y Políticas
       </h3>
       <p className="text-sm text-primary-600 dark:text-primary-300 mt-2">
-        Las tarifas a continuación se basan en datos suministrados por la comunidad y pueden excluir tarifas adicionales y servicios.
+        La siguiente información sobre tarifas y servicios corresponde a los datos proporcionados por el alojamiento.
       </p>
-      <Tabs defaultValue="required-fees" className="mt-8">
+      <Tabs defaultValue="servicios-incluidos" className="mt-8">
         <TabsList className="grid w-full grid-cols-3">
         <TabsTrigger value="servicios-incluidos">Servicios incluidos en el precio</TabsTrigger>
         <TabsTrigger value="datos-interes">Datos de interés</TabsTrigger>

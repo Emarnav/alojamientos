@@ -12,8 +12,8 @@ import { authMiddleware } from "./middleware/authMiddleware";
 import tenantRoutes from "./routes/tenantRoutes";
 import managerRoutes from "./routes/managerRoutes";
 import propertyRoutes from "./routes/propertyRoutes";
-import leaseRoutes from "./routes/leaseRoutes";
-import applicationRoutes from "./routes/applicationRoutes";
+import chatRoutes from "./routes/chatRoutes";
+import adminRoutes from "./routes/adminRoutes";
 
 /* CONFIGURATIONS */
 dotenv.config();
@@ -27,18 +27,15 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
 
 /* Hacer accesibles las imágenes en /alojamientos */
-app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
+app.use(express.static(path.join(__dirname, "../public")));
 
-/* ROUTES */
-app.get("/", (req, res) => {
-  res.send("This is home route");
-});
-
-app.use("/api/solicitudes", applicationRoutes);
+/* Rutas */
 app.use("/api/alojamientos", propertyRoutes);
-app.use("/api/leases", leaseRoutes);
-app.use("/api/inquilinos", authMiddleware(["inquilino"]), tenantRoutes);
-app.use("/api/propietarios", authMiddleware(["propietario"]), managerRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/estudiante", tenantRoutes);
+app.use("/api/propietario", managerRoutes);
+app.use("/api/chat", authMiddleware(["estudiante", "propietario"]), chatRoutes);
+
 
 /* SERVER */
 const port = Number(process.env.PORT) || 3002;

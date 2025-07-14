@@ -1,13 +1,26 @@
-import Navbar from "@/components/Navbar";
-import Landing from "./(nondashboard)/landing/page";
+import React from "react";
+import HeroSection from "./(nondashboard)/home/HeroSection";
+import FeaturesSection from "./(nondashboard)/home/FeaturesSection";
+import DiscoverSection from "./(nondashboard)/home/DiscoverSection";
+import CallToActionSection from "./(nondashboard)/home/CallToActionSection";
+import FooterSection from "./(nondashboard)/home/FooterSection";
+import { Metadata } from "next";
 
-export default function Home() {
+export const metadata: Metadata = {
+  title: "Encuentra tu alojamiento universitario | UCH-CEU",
+  description: "Encuentra el alojamiento perfecto para tu vida universitaria.",
+};
+
+const Landing = () => {
   return (
-    <div className="h-full w-full">
-      <Navbar />
-      <main className={`h-full flex w-full flex-col`}>
-        <Landing />
-      </main>
+    <div>
+      <HeroSection />
+      <FeaturesSection />
+      <DiscoverSection />
+      <CallToActionSection />
+      <FooterSection />
     </div>
   );
-}
+};
+
+export default Landing;

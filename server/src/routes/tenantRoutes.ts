@@ -7,14 +7,18 @@ import {
   addFavoriteProperty,
   removeFavoriteProperty,
 } from "../controllers/tenantControllers";
+import { authMiddleware, extractUserFromToken } from "../middleware/authMiddleware";
 
 const router = express.Router();
 
-router.get("/:cognitoId", getTenant);
-router.put("/:cognitoId", updateTenant);
-router.post("/", createTenant);
-router.get("/:cognitoId/current-residences", getCurrentResidences);
-router.post("/:cognitoId/favoritos/:propertyId", addFavoriteProperty);
-router.delete("/:cognitoId/favoritos/:propertyId", removeFavoriteProperty);
+// 🔓 Ruta abierta para registro (aún no existe en BD)
+router.post("/", extractUserFromToken, createTenant);
+
+// 🔐 Rutas protegidas: solo tipo 'estudiante'
+router.get("/:cognitoId", authMiddleware(["estudiante"]), getTenant);
+router.put("/:cognitoId", authMiddleware(["estudiante"]), updateTenant);
+router.get("/:cognitoId/current-residences", authMiddleware(["estudiante"]), getCurrentResidences);
+router.post("/:cognitoId/favoritos/:propertyId", authMiddleware(["estudiante"]), addFavoriteProperty);
+router.delete("/:cognitoId/favoritos/:propertyId", authMiddleware(["estudiante"]), removeFavoriteProperty);
 
 export default router;
