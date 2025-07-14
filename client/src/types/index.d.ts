@@ -76,6 +76,7 @@ declare global {
   interface ContactWidgetProps {
     alojamiento: Alojamiento;
     onOpenModal: () => void;
+    onStartChat: () => void;
   }
 
   interface ImagePreviewsProps {
