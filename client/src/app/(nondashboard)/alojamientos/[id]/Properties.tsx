@@ -8,7 +8,6 @@ import PropertyOverview from "./PropertyOverview";
 import PropertyDetails from "./PropertyDetails";
 import PropertyLocation from "./PropertyLocation";
 import ContactWidget from "./ContactWidget";
-import ApplicationModal from "./ApplicationModal";
 import ImageCarousel from "./ImageCarousel";
 import ChatWindow from "@/components/ChatWindow";
 
