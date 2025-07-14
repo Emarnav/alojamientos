@@ -40,7 +40,7 @@ app.use("/api/chat", authMiddleware(["estudiante", "propietario"]), chatRoutes);
 /* SERVER */
 const port = Number(process.env.PORT) || 3002;
 app.get("/", (_req, res) => {
-  res.send("API de alojamientos corriendo correctamente 🚀");
+  res.send("API corriendo correctamente");
 });
 
 app.listen(port, "0.0.0.0", () => {

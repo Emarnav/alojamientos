@@ -366,30 +366,6 @@ export const api = createApi({
     }),
 
 
-
-    // application related endpoints
-    getApplications: build.query<
-      Solicitud[],
-      { userId?: string; userType?: string }
-    >({
-      query: (params) => {
-        const queryParams = new URLSearchParams();
-        if (params.userId) {
-          queryParams.append("userId", params.userId.toString());
-        }
-        if (params.userType) {
-          queryParams.append("userType", params.userType);
-        }
-
-        return `solicitudes?${queryParams.toString()}`;
-      },
-      providesTags: ["Solicitudes"],
-      async onQueryStarted(_, { queryFulfilled }) {
-        await withToast(queryFulfilled, {
-          error: "Error al cargar las solicitudes.",
-        });
-      },
-    }),
     // 🔹 Obtener alojamientos pendientes
     getAlojamientosPendientes: build.query<Alojamiento[], void>({
       query: () => "admin/alojamientos/pendientes",
@@ -477,7 +453,6 @@ export const {
   useSendMessageMutation,
   useGetChatMessagesQuery,
   useGetUserConversationsQuery,
-  useGetApplicationsQuery,
   useGetAlojamientosPendientesQuery,
   useApproveAlojamientoMutation,
   useRejectAlojamientoMutation,
