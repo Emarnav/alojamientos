@@ -21,7 +21,7 @@ const ManagerSettings = () => {
 
   const handleSubmit = async (data: typeof initialData) => {
     await updateManager({
-      cognitoId: authUser?.cognitoInfo?.userId,
+      cognitoId: authUser?.userInfo?.cognitoId,
       ...data,
     });
   };
@@ -30,7 +30,7 @@ const ManagerSettings = () => {
     <SettingsForm
       initialData={initialData}
       onSubmit={handleSubmit}
-      userType="propietario"
+      userType="Propietario"
     />
   );
 };

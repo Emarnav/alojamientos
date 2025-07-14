@@ -5,9 +5,6 @@ import React, { useState } from "react";
 
 const CardCompact = ({
   alojamiento,
-  isFavorite,
-  onFavoriteToggle,
-  showFavoriteButton = true,
   alojamientoLink,
 }: CardCompactProps) => {
   const [imgSrc, setImgSrc] = useState(
@@ -54,18 +51,6 @@ const CardCompact = ({
                 alojamiento.nombre
               )}
             </h2>
-            {showFavoriteButton && (
-              <button
-                className="bg-white rounded-full p-1"
-                onClick={onFavoriteToggle}
-              >
-                <Heart
-                  className={`w-4 h-4 ${
-                    isFavorite ? "text-red-500 fill-red-500" : "text-gray-600"
-                  }`}
-                />
-              </button>
-            )}
           </div>
           <p className="text-gray-600 mb-1 text-sm">
             {alojamiento?.location?.address}, {alojamiento?.location?.city}

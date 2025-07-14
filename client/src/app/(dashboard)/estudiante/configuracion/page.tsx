@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import TenantSettings from "./TenantSettings";
+import StudentSettings from "./StudentSettings";
 
 export const metadata: Metadata = {
   title: "Configuración del perfil | UCH-CEU",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <TenantSettings />;
+  return <StudentSettings />;
 }

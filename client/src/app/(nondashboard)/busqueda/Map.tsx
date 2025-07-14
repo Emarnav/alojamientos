@@ -3,6 +3,8 @@ import React, { useEffect, useRef } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { useAppSelector } from "@/state/redux";
+import { Alojamiento } from "@/types/prismaTypes";
+
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string;
 
@@ -64,8 +66,8 @@ const Map = ({ alojamientos, isLoading, isError }: MapProps) => {
 const createPropertyMarker = (alojamiento: Alojamiento, map: mapboxgl.Map) => {
   const marker = new mapboxgl.Marker()
     .setLngLat([
-      alojamiento.ubicacion.coordinates.longitude,
-      alojamiento.ubicacion.coordinates.latitude,
+      alojamiento.ubicacion?.coordinates?.longitude || 0,
+      alojamiento.ubicacion?.coordinates?.latitude || 0,
     ])
     .setPopup(
       new mapboxgl.Popup().setHTML(

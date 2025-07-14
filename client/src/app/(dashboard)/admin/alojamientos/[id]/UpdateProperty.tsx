@@ -35,7 +35,7 @@ const CheckProperty = () => {
       nombre: "",
       descripcion: "",
       direccion: "",
-      localidad: "",
+      ciudad: "",
       provincia: "",
       codigoPostal: "",
       tipoAlojamiento: undefined,
@@ -87,8 +87,12 @@ const CheckProperty = () => {
       const { propietario, ubicacion, id, photoUrls, ...rest } = propertyData;
       form.reset({
         ...rest,
+        motivoRechazo: rest.motivoRechazo ?? "",
+        dirigidoA: rest.dirigidoA as "Solo Chicas" | "Solo Chicos" | "Mixto",
+        estado: rest.estado as "Pendiente" | "Aprobado" | "Rechazado",
+        tipoAlojamiento: rest.tipoAlojamiento as "Colegio Mayor" | "Piso" | "Piso Compartido" | "Residencia Familiar" | "Residencia Universitaria",
         direccion: ubicacion?.direccion ?? "",
-        localidad: ubicacion?.ciudad ?? "",
+        ciudad: ubicacion?.ciudad ?? "",
         provincia: ubicacion?.provincia ?? "",
         codigoPostal: ubicacion?.codigoPostal ?? "",
         photoUrls: [],
@@ -171,7 +175,7 @@ const CheckProperty = () => {
                 </div>
                 <CustomFormField name="descripcion" label="Descripción" type="textarea" disabled />
                 <div className="flex justify-between gap-4">
-                  <CustomFormField name="localidad" label="Localidad" className="w-full" disabled />
+                  <CustomFormField name="ciudad" label="Localidad" className="w-full" disabled />
                   <CustomFormField name="provincia" label="Provincia" className="w-full" disabled />
                   <CustomFormField name="codigoPostal" label="Código Postal" className="w-full" disabled />
                 </div>

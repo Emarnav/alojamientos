@@ -115,7 +115,7 @@ const StudentCard = ({
       </div>
 
       {/* Modal de chat */}
-      {showChat &&
+      {showChat && conversacionId !== undefined &&
         createPortal(
           <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
             <div className="relative w-full max-w-2xl mx-auto">
@@ -127,13 +127,14 @@ const StudentCard = ({
               </button>
               <ChatWindow
                 conversacionId={conversacionId}
-                remitenteId={remitenteId}
-                nombreReceptor={nombreReceptor}
+                remitenteId={remitenteId!}
+                nombreReceptor={nombreReceptor!}
               />
             </div>
           </div>,
           document.body
-        )}
+        )
+      }
     </>
   );
 };

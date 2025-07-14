@@ -12,7 +12,7 @@ import React from "react";
 
 const Listings = ({ alojamientos, isLoading, isError }: ListingsProps) => {
   const { data: authUser } = useGetAuthUserQuery();
-  const isEstudiante = authUser?.userRole === "estudiante";
+  const isEstudiante = authUser?.userRole === "Estudiante";
 
   const { data: estudiante } = useGetTenantQuery(
     authUser?.cognitoInfo?.userId || "",
@@ -21,30 +21,9 @@ const Listings = ({ alojamientos, isLoading, isError }: ListingsProps) => {
     }
   );
 
-  const [addFavorite] = useAddFavoritePropertyMutation();
-  const [removeFavorite] = useRemoveFavoritePropertyMutation();
   const viewMode = useAppSelector((state) => state.global.viewMode);
   const filters = useAppSelector((state) => state.global.filters);
 
-  const handleFavoriteToggle = async (propertyId: number) => {
-    if (!authUser || authUser.userRole !== "estudiante") return;
-
-    const isFavorite = estudiante?.favoritos?.some(
-      (fav: Alojamiento) => fav.id === propertyId
-    );
-
-    if (isFavorite) {
-      await removeFavorite({
-        cognitoId: authUser.cognitoInfo.userId,
-        propertyId,
-      });
-    } else {
-      await addFavorite({
-        cognitoId: authUser.cognitoInfo.userId,
-        propertyId,
-      });
-    }
-  };
 
   if (isLoading) return <>Cargando...</>;
   if (isError || !alojamientos) return <div>Error al cargar los alojamientos</div>;
@@ -64,26 +43,12 @@ const Listings = ({ alojamientos, isLoading, isError }: ListingsProps) => {
               <Card
                 key={alojamiento.id}
                 alojamiento={alojamiento}
-                isFavorite={
-                  estudiante?.favoritos?.some(
-                    (fav: Alojamiento) => fav.id === alojamiento.id
-                  ) || false
-                }
-                onFavoriteToggle={() => handleFavoriteToggle(alojamiento.id)}
-                showFavoriteButton={authUser?.userRole === "estudiante"}
                 alojamientoLink={`/alojamientos/${alojamiento.id}`}
               />
             ) : (
               <CardCompact
                 key={alojamiento.id}
                 alojamiento={alojamiento}
-                isFavorite={
-                  estudiante?.favoritos?.some(
-                    (fav: Alojamiento) => fav.id === alojamiento.id
-                  ) || false
-                }
-                onFavoriteToggle={() => handleFavoriteToggle(alojamiento.id)}
-                showFavoriteButton={authUser?.userRole === "estudiante"}
                 alojamientoLink={`/alojamientos/${alojamiento.id}`}
               />
             )

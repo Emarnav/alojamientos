@@ -22,7 +22,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 
     const userRole = authUser.userRole?.toLowerCase();
     
-    if (userRole === "propietario" && pathname === "/") {
+    if (userRole === "Propietario" && pathname === "/") {
       router.push("/propietario/alojamientos", { scroll: false });
     } else {
       setIsLoading(false); 

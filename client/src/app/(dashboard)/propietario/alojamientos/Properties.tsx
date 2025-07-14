@@ -30,9 +30,6 @@ const Properties = () => {
           <Card
             key={alojamiento.id}
             alojamiento={alojamiento}
-            isFavorite={false}
-            onFavoriteToggle={() => {}}
-            showFavoriteButton={false}
             alojamientoLink={`/propietario/alojamientos/${alojamiento.id}`}
           />
         ))}

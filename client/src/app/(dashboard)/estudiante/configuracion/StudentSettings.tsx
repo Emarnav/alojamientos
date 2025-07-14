@@ -7,7 +7,7 @@ import {
 } from "@/state/api";
 import React from "react";
 
-const TenantSettings = () => {
+const StudentSettings = () => {
   const { data: authUser, isLoading } = useGetAuthUserQuery();
   const [updateStudent] = useUpdateStudentSettingsMutation();
 
@@ -21,7 +21,7 @@ const TenantSettings = () => {
 
   const handleSubmit = async (data: typeof initialData) => {
     await updateStudent({
-      cognitoId: authUser?.cognitoInfo?.userId,
+      cognitoId: authUser!.userInfo!.cognitoId,
       ...data,
     });
   };
@@ -30,9 +30,9 @@ const TenantSettings = () => {
     <SettingsForm
       initialData={initialData}
       onSubmit={handleSubmit}
-      userType="estudiante"
+      userType="Estudiante"
     />
   );
 };
 
-export default TenantSettings;
+export default StudentSettings;

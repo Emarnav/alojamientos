@@ -1,6 +1,5 @@
 import { LucideIcon } from "lucide-react";
 import { AuthUser } from "aws-amplify/auth";
-import { Alojamiento as PrismaAlojamiento, Usuario, Solicitud } from "@prisma/client";
 import { MotionProps as OriginalMotionProps } from "framer-motion";
 
 declare module "framer-motion" {
@@ -10,7 +9,6 @@ declare module "framer-motion" {
 }
 
 declare global {
-  type Alojamiento = PrismaAlojamiento;
 
   enum AmenityEnum {
     WasherDryer = "WasherDryer",
@@ -103,26 +101,16 @@ declare global {
     alojamiento: Alojamiento;
   }
 
-  interface ApplicationCardProps {
-    solicitud: Solicitud;
-    userType: "propietario" | "estudiante";
-    children: React.ReactNode;
-  }
+
 
   interface CardProps {
     alojamiento: Alojamiento;
-    isFavorite?: boolean;
-    onFavoriteToggle?: () => void;
-    showFavoriteButton?: boolean;
     alojamientoLink?: string;
     context?: "public" | "admin"; 
   }
 
   interface CardCompactProps {
     alojamiento: Alojamiento;
-    isFavorite: boolean;
-    onFavoriteToggle: () => void;
-    showFavoriteButton?: boolean;
     alojamientoLink?: string;
   }
 
@@ -136,19 +124,19 @@ declare global {
   }
 
   interface AppSidebarProps {
-    userType: "propietario" | "estudiante" | "admin";
+    userType: "Propietario" | "Estudiante" | "Admin";
   }
 
   interface SettingsFormProps {
     initialData: SettingsFormData;
     onSubmit: (data: SettingsFormData) => Promise<void>;
-    userType: "propietario" | "estudiante" | "admin";
+    userType: "Propietario" | "Estudiante" | "Admin";
   }
 
   interface User {
     cognitoInfo: AuthUser;
     userInfo: Usuario;
-    userRole: "estudiante" | "propietario" | "admin";
+    userRole: "Estudiante" | "Propietario" | "Admin";
   }
 }
 

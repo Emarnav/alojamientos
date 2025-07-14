@@ -23,7 +23,7 @@ export const updateProperty = (req: Request, res: Response): void => {
 
       const {
         direccion,
-        localidad,
+        ciudad,
         provincia,
         pais,
         codigoPostal,
@@ -57,7 +57,7 @@ export const updateProperty = (req: Request, res: Response): void => {
       // 4. Actualizar ubicación
       const geo = await axios.get("https://nominatim.openstreetmap.org/search?" + new URLSearchParams({
         street: direccion,
-        city: localidad,
+        city: ciudad,
         country: "España",
         postalcode: codigoPostal,
         format: "json",
@@ -71,7 +71,7 @@ export const updateProperty = (req: Request, res: Response): void => {
       await prisma.$executeRaw`
         UPDATE "Ubicacion"
         SET direccion = ${direccion},
-            ciudad = ${localidad},
+            ciudad = ${ciudad},
             provincia = ${provincia},
             pais = 'España',
             "codigoPostal" = ${codigoPostal},
@@ -183,7 +183,6 @@ export const getProperties = async (
 ): Promise<void> => {
   try {
     const {
-      favoriteIds,
       priceMin,
       priceMax,
       beds,
@@ -199,12 +198,6 @@ export const getProperties = async (
 
     let whereConditions: Prisma.Sql[] = [];
 
-    if (favoriteIds) {
-      const favoriteIdsArray = (favoriteIds as string).split(",").map(Number);
-      whereConditions.push(
-        Prisma.sql`p.id IN (${Prisma.join(favoriteIdsArray)})`
-      );
-    }
 
     if (priceMin) {
       whereConditions.push(
@@ -287,7 +280,7 @@ export const getProperties = async (
         json_build_object(
           'id', l.id,
           'direccion', l.direccion,
-          'localidad', l.ciudad,
+          'ciudad', l.ciudad,
           'provincia', l.provincia,
           'codigoPostal', l."codigoPostal",
           'coordinates', json_build_object(
@@ -367,11 +360,11 @@ export const createProperty = (req: Request, res: Response): void => {
     const tempDir = files[0]?.destination ?? "";
 
     try {
-      const { direccion, localidad, provincia, codigoPostal, managerUsuarioId, ...propertyData } = req.body;
+      const { direccion, ciudad, provincia, codigoPostal, managerUsuarioId, ...propertyData } = req.body;
 
       const geo = await axios.get("https://nominatim.openstreetmap.org/search?" + new URLSearchParams({
         street: direccion,
-        city: localidad,
+        city: ciudad,
         country: "España",
         postalcode: codigoPostal,
         format: "json",
@@ -382,7 +375,7 @@ export const createProperty = (req: Request, res: Response): void => {
 
       const [ubicacion] = await prisma.$queryRaw<Ubicacion[]>`
         INSERT INTO "Ubicacion" (direccion, ciudad, provincia, pais, "codigoPostal", coordinates)
-        VALUES (${direccion}, ${localidad}, ${provincia}, 'España', ${codigoPostal}, ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326))
+        VALUES (${direccion}, ${ciudad}, ${provincia}, 'España', ${codigoPostal}, ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326))
         RETURNING id;
       `;
 

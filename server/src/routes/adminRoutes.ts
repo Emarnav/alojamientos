@@ -9,9 +9,9 @@ import { authMiddleware } from "../middleware/authMiddleware";
 
 const router = express.Router();
 
-router.get("/alojamientos", authMiddleware(["admin"]), getAlojamientosPendientes); 
+router.get("/alojamientos", authMiddleware(["Admin"]), getAlojamientosPendientes); 
 router.get("/:cognitoId", getAdmin);
-router.put("/alojamientos/:id/aprobar", authMiddleware(["admin"]), aprobarAlojamiento);
-router.put("/alojamientos/:id/rechazar", authMiddleware(["admin"]), rechazarAlojamiento);
+router.put("/alojamientos/:id/aprobar", authMiddleware(["Admin"]), aprobarAlojamiento);
+router.put("/alojamientos/:id/rechazar", authMiddleware(["Admin"]), rechazarAlojamiento);
 
 export default router;

@@ -47,7 +47,7 @@ export const propertySchema = z.object({
     "Residencia Universitaria"
   ]),
   direccion: z.string().min(1, "La dirección es necesaria"),
-  localidad: z.string().min(1, "La localidad es necesaria"),
+  ciudad: z.string().min(1, "La ciudad es necesaria"),
   provincia: z.string().min(1, "La provincia es necesaria"),
   codigoPostal: z.string().min(1, "El código postal es necesario"),
   infoExtra: z.string().optional(),

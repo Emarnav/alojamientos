@@ -155,7 +155,6 @@ export const api = createApi({
           SuperficieMax: filters?.superficie?.[1],
           amenities: filters?.amenities?.join(","),
           includedExpenses: filters?.includedExpenses?.join(","),
-          favoriteIds: filters?.favoriteIds?.join(","),
           latitude: filters?.coordinates?.[1],
           longitude: filters?.coordinates?.[0],
           estado: "Aprobado",
@@ -336,7 +335,7 @@ export const api = createApi({
         method: "PUT",
         body: updatedManager,
       }),
-      invalidatesTags: (result) => [{ type: "Propietario", id: result?.id }],
+      invalidatesTags: (result) => [{ type: "Propietarios", id: result?.id }],
       async onQueryStarted(_, { queryFulfilled }) {
         await withToast(queryFulfilled, {
           success: "Ajustes actualizados correctamente!",

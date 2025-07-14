@@ -12,8 +12,8 @@ const router = express.Router();
 
 router.get("/", getProperties);
 router.get("/:id", getProperty);
-router.post("/", authMiddleware(["propietario"]), createProperty);
-router.put("/:id", authMiddleware(["propietario", "admin"]), updateProperty);
-router.delete("/:id", authMiddleware(["propietario"]), deleteProperty);
+router.post("/", authMiddleware(["Propietario"]), createProperty);
+router.put("/:id", authMiddleware(["Propietario", "Admin"]), updateProperty);
+router.delete("/:id", authMiddleware(["Propietario"]), deleteProperty);
 
 export default router;

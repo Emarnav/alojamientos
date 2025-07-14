@@ -95,7 +95,9 @@ export const getCurrentResidences = async (req: Request, res: Response): Promise
       where: { id: usuario.id },
       include: {
         alojamientosFavoritos: {
-          include: { ubicacion: true },
+          include: {
+            ubicacion: true,
+          },
         },
       },
     });

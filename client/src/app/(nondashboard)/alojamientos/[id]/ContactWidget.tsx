@@ -81,7 +81,7 @@ const ContactWidget = ({ alojamiento }: ContactWidgetProps) => {
         )}
       </div>
       <hr />
-      {authUser?.userRole === "estudiante" && (
+      {authUser?.userRole === "Estudiante" && (
         <div className="flex flex-col gap-2 my-4">
           <h4 className="text-primary-800 font-semibold text-base">
             Envía un mensaje al propietario

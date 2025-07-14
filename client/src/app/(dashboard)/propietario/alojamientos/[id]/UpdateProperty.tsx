@@ -56,7 +56,7 @@ const UpdateProperty = () => {
       nombre: "",
       descripcion: "",
       direccion: "",
-      localidad: "",
+      ciudad: "",
       provincia: "",
       codigoPostal: "",
       tipoAlojamiento: undefined,
@@ -101,10 +101,11 @@ useEffect(() => {
     const { propietario, ubicacion, id, photoUrls, ...rest } = propertyData;
     form.reset({
       ...rest,
-      tipoAlojamiento: rest.tipoAlojamiento ?? undefined,
-      dirigidoA: rest.dirigidoA ?? undefined,
+      tipoAlojamiento: rest.tipoAlojamiento as "Colegio Mayor" | "Piso" | "Piso Compartido" | "Residencia Familiar" | "Residencia Universitaria",
+      estado: rest.estado as "Pendiente" | "Aprobado" | "Rechazado",
+      dirigidoA: rest.dirigidoA as "Solo Chicas" | "Solo Chicos" | "Mixto",
       direccion: ubicacion?.direccion ?? "",
-      localidad: ubicacion?.ciudad ?? "",
+      ciudad: ubicacion?.ciudad ?? "",
       provincia: ubicacion?.provincia ?? "",
       codigoPostal: ubicacion?.codigoPostal ?? "",
       motivoRechazo: rest.motivoRechazo ?? "",
@@ -213,7 +214,7 @@ useEffect(() => {
                 />
 
                 <div className="flex justify-between gap-4 ">
-                  <CustomFormField name="localidad" label="Localidad" className="w-full" />
+                  <CustomFormField name="ciudad" label="Localidad" className="w-full" />
                   <CustomFormField
                     name="provincia"
                     label="Provincia"

@@ -104,10 +104,11 @@ const ListadoAlojamientos = () => {
                       </h3>
                       <p>
                         <strong>Dirección:</strong>{" "}
-                        {alojamiento.ubicacion.direccion},{" "}
-                        {alojamiento.ubicacion.localidad},{" "}
-                        {alojamiento.ubicacion.provincia}
+                        {alojamiento.ubicacion?.direccion},{" "}
+                        {alojamiento.ubicacion?.ciudad},{" "}
+                        {alojamiento.ubicacion?.provincia}
                       </p>
+
                       <p>
                         <strong>Superficie:</strong> {alojamiento.superficie} m²
                       </p>

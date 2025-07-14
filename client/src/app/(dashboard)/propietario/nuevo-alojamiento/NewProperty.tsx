@@ -24,7 +24,7 @@ const NewProperty = () => {
       nombre: "",
       descripcion: "",
       direccion: "",
-      localidad: "",
+      ciudad: "",
       provincia: "",
       codigoPostal: "",
       precio: 0,
@@ -134,7 +134,7 @@ const NewProperty = () => {
                 />
 
                 <div className="flex justify-between gap-4 ">
-                  <CustomFormField name="localidad" label="Localidad" className="w-full" />
+                  <CustomFormField name="ciudad" label="Localidad" className="w-full" />
                   <CustomFormField
                     name="provincia"
                     label="Provincia"

@@ -113,11 +113,11 @@ const Navbar = () => {
                 className="text-white hover:text-primary-700"
                 onClick={() => {
                   const role = authUser.userRole?.toLowerCase();
-                  if (role === "propietario") {
+                  if (role === "Propietario") {
                     router.push("/propietario/alojamientos");
-                  } else if (role === "estudiante") {
+                  } else if (role === "Estudiante") {
                     router.push("/estudiante/solicitudes");
-                  } else if (role === "admin") {
+                  } else if (role === "Admin") {
                     router.push("/admin/alojamientos");
                   }
                 }}
