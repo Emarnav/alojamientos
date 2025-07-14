@@ -5,11 +5,10 @@ import {
   useRemoveFavoritePropertyMutation,
 } from "@/state/api";
 import { useAppSelector } from "@/state/redux";
-import { Alojamiento } from "@/types/prismaTypes";
 import Card from "@/components/Card";
 import CardCompact from "@/components/CardCompact";
 import React from "react";
-import { ListingsProps } from "@/types";
+
 
 const Listings = ({ alojamientos, isLoading, isError }: ListingsProps) => {
   const { data: authUser } = useGetAuthUserQuery();

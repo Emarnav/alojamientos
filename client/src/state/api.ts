@@ -2,9 +2,9 @@ import { cleanParams, createNewUserInDatabase, withToast } from "@/lib/utils";
 import {
   Admin,
   Propietario,
-  Alojamiento,
   Estudiante,
   Conversacion,
+  Alojamiento,
 } from "@/types/prismaTypes";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
