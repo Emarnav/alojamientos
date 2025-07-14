@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link"; // ✅ Añadido
 import { useGetPropertiesQuery } from "@/state/api";
 import { Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -18,10 +19,11 @@ const FeaturedSection = () => {
   }
 
   const destacados = alojamientos?.filter((a: any) => a.esDestacado).slice(0, 6) ?? [];
-  const ultimos = alojamientos
-    ?.filter((a: any) => !a.esDestacado)
-    .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 10) ?? [];
+  const ultimos =
+    alojamientos
+      ?.filter((a: any) => !a.esDestacado)
+      .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 10) ?? [];
 
   return (
     <section className="py-10 px-4 max-w-7xl mx-auto">
@@ -31,6 +33,7 @@ const FeaturedSection = () => {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-10">
             {destacados.map((alojamiento: any) => (
               <StudentCard
+                key={alojamiento.id} // ✅ Añadido
                 alojamiento={alojamiento}
               />
             ))}
@@ -42,6 +45,7 @@ const FeaturedSection = () => {
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {ultimos.map((alojamiento: any) => (
           <StudentCard
+            key={alojamiento.id} // ✅ Añadido
             alojamiento={alojamiento}
           />
         ))}
@@ -49,7 +53,7 @@ const FeaturedSection = () => {
 
       <div className="mt-10 text-center">
         <Button asChild>
-          <a href="/alojamientos">Ver todos los alojamientos</a>
+          <Link href="/alojamientos">Ver todos los alojamientos</Link> {/* ✅ Sustituido <a> por <Link> */}
         </Button>
       </div>
     </section>
