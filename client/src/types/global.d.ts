@@ -64,6 +64,10 @@ declare global {
   interface PropertyOverviewProps {
     alojamiento: Alojamiento;
   }
+  
+  interface AuthProps {
+    children?: React.ReactNode;
+  }
 
   interface ApplicationModalProps {
     isOpen: boolean;

@@ -161,7 +161,11 @@ const formFields = {
   },
 };
 
-const Auth = () => {
+interface AuthProps {
+  children?: React.ReactNode;
+}
+
+const Auth = ({ children }: AuthProps) => {
   const { user } = useAuthenticator((context) => [context.user]);
   const router = useRouter();
   const pathname = usePathname();
