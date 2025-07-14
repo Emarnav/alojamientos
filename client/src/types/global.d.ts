@@ -1,6 +1,6 @@
 import { LucideIcon } from "lucide-react";
 import { AuthUser } from "aws-amplify/auth";
-import { Alojamiento, Usuario, Solicitud } from "@prisma/client";
+import { Alojamiento as PrismaAlojamiento, Usuario, Solicitud } from "@prisma/client";
 import { MotionProps as OriginalMotionProps } from "framer-motion";
 
 declare module "framer-motion" {
@@ -10,6 +10,8 @@ declare module "framer-motion" {
 }
 
 declare global {
+  type Alojamiento = PrismaAlojamiento;
+
   enum AmenityEnum {
     WasherDryer = "WasherDryer",
     AirConditioning = "AirConditioning",
