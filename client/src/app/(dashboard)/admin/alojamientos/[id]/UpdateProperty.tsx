@@ -10,7 +10,7 @@ import {
   useApproveAlojamientoMutation,
   useRejectAlojamientoMutation,
 } from "@/state/api";
-import { AmenityEnum, IncludedExpenseEnum, PropertyTypeEnum, TargetAudienceEnum } from "@/lib/constants";
+import { AmenityEnum, IncludedExpenseEnum} from "@/lib/constants";
 import { zodResolver } from "@hookform/resolvers/zod";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
