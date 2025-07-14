@@ -161,7 +161,7 @@ const formFields = {
   },
 };
 
-const Auth = ({ children }: { children: React.ReactNode }) => {
+const Auth = () => {
   const { user } = useAuthenticator((context) => [context.user]);
   const router = useRouter();
   const pathname = usePathname();
@@ -227,9 +227,6 @@ useEffect(() => {
     }
   }, [user, isAuthPage, router]);
 
-  if (!isAuthPage && !isDashboardPage) {
-    return <>{children}</>;
-  }
 
   return (
     <div className="h-full">
@@ -244,7 +241,6 @@ useEffect(() => {
         components={components}
         formFields={formFields}
       >
-        {() => <>{children}</>}
       </Authenticator>
     </div>
   );
