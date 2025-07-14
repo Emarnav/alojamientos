@@ -19,6 +19,8 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
+
 
 
 const UpdateProperty = () => {
@@ -43,10 +45,8 @@ const UpdateProperty = () => {
     try {
       await deleteProperty(Number(alojamientoId)).unwrap();
       router.push("/propietario/alojamientos");
-      ("Alojamiento eliminado correctamente");
     } catch (error) {
       console.error("Error al eliminar la propiedad:", error);
-      ("Hubo un error al eliminar la propiedad");
     }
   };
 
@@ -113,7 +113,7 @@ useEffect(() => {
 
     setExistingImages(photoUrls);
   }
-}, [propertyData]);
+}, [propertyData, form]);
 
 
   const onSubmit = async (data: PropertyFormData) => {
@@ -326,11 +326,12 @@ useEffect(() => {
               <div className="grid grid-cols-3 gap-4">
                 {existingImages.map((filename, idx) => (
                   <div key={idx} className="relative group">
-                    <img
+                    <Image
                       src={`${process.env.NEXT_PUBLIC_MEDIA_BASE_URL}${filename}`}
                       alt={`Imagen ${idx}`}
                       className="rounded w-full h-32 object-cover"
                     />
+
                     <button
                       type="button"
                       onClick={() => handleRemoveImage(idx)}
