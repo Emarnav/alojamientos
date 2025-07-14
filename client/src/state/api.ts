@@ -141,30 +141,28 @@ export const api = createApi({
     // property related endpoints
     getProperties: build.query<
       Alojamiento[],
-      Partial<FiltersState> & { favoriteIds?: number[] }
+      (Partial<FiltersState> & { favoriteIds?: number[] }) | void
     >({
       query: (filters = {}) => {
         const params = cleanParams({
-          location: filters.location,
-          precioMin: filters.rangoPrecio?.[0],
-          precioMax: filters.rangoPrecio?.[1],
-          habitaciones: filters.habitaciones,
-          banos: filters.banos,
-          tipoAlojamiento: filters.tipoAlojamiento,
-          superficieMin: filters.superficie?.[0],
-          SuperficieMax: filters.superficie?.[1],
-          amenities: filters.amenities?.join(","),
-          includedExpenses: filters.includedExpenses?.join(","),
-          disponibleDesde: filters.disponibleDesde,
-          favoriteIds: filters.favoriteIds?.join(","),
-          latitude: filters.coordinates?.[1],
-          longitude: filters.coordinates?.[0],
+          location: filters?.location,
+          precioMin: filters?.rangoPrecio?.[0],
+          precioMax: filters?.rangoPrecio?.[1],
+          habitaciones: filters?.habitaciones,
+          banos: filters?.banos,
+          tipoAlojamiento: filters?.tipoAlojamiento,
+          superficieMin: filters?.superficie?.[0],
+          SuperficieMax: filters?.superficie?.[1],
+          amenities: filters?.amenities?.join(","),
+          includedExpenses: filters?.includedExpenses?.join(","),
+          favoriteIds: filters?.favoriteIds?.join(","),
+          latitude: filters?.coordinates?.[1],
+          longitude: filters?.coordinates?.[0],
           estado: "Aprobado",
         });
 
         return { url: "alojamientos", params };
       },
-
       providesTags: (result) =>
         result
           ? [
