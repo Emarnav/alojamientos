@@ -24,7 +24,17 @@ app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 app.use(morgan("common"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cors());
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://alojamientos-ed8df6scl-emilios-projects-fa5001f8.vercel.app/",
+  "https://alojamientos-emilios-projects-fa5001f8.vercel.app"
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 
 /* Hacer accesibles las imágenes en /alojamientos */
 app.use(express.static(path.join(__dirname, "../public")));
