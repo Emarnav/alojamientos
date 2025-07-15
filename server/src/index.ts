@@ -26,8 +26,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://alojamientos-ed8df6scl-emilios-projects-fa5001f8.vercel.app/",
-  "https://alojamientos-emilios-projects-fa5001f8.vercel.app"
+  "https://alojamientos-lemon.vercel.app/",
+
 ];
 
 app.use(cors({
