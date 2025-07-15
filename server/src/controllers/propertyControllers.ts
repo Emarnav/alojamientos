@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { PrismaClient, Prisma, Ubicacion } from "@prisma/client";
-import { wktToGeoJSON } from "@terraformer/wkt";
 import axios from "axios";
 import { getMulterForAlojamiento } from "../multerConfig";
 import path from "path";
@@ -309,11 +308,18 @@ export const createProperty = (req: Request, res: Response): void => {
 
       const [lon, lat] = geo.data[0] ? [parseFloat(geo.data[0].lon), parseFloat(geo.data[0].lat)] : [0, 0];
 
-      const [ubicacion] = await prisma.$queryRaw<Ubicacion[]>`
-        INSERT INTO "Ubicacion" (direccion, ciudad, provincia, pais, "codigoPostal", coordinates)
-        VALUES (${direccion}, ${ciudad}, ${provincia}, 'España', ${codigoPostal}, ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326))
-        RETURNING id;
-      `;
+      const ubicacion = await prisma.ubicacion.create({
+        data: {
+          direccion,
+          ciudad,
+          provincia,
+          pais: "España",
+          codigoPostal,
+          latitud: lat,
+          longitud: lon,
+        },
+      });
+
 
       const alojamiento = await prisma.alojamiento.create({
         data: {
