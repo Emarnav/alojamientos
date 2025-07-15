@@ -68,16 +68,19 @@ export const updateProperty = (req: Request, res: Response): void => {
 
       const [lon, lat] = geo.data[0] ? [parseFloat(geo.data[0].lon), parseFloat(geo.data[0].lat)] : [0, 0];
 
-      await prisma.$executeRaw`
-        UPDATE "Ubicacion"
-        SET direccion = ${direccion},
-            ciudad = ${ciudad},
-            provincia = ${provincia},
-            pais = 'España',
-            "codigoPostal" = ${codigoPostal},
-            coordinates = ST_SetSRID(ST_MakePoint(${lon}, ${lat}), 4326)
-        WHERE id = ${property.ubicacionId};
-      `;
+      await prisma.ubicacion.update({
+        where: { id: property.ubicacionId },
+        data: {
+          direccion,
+          ciudad,
+          provincia,
+          pais: 'España',
+          codigoPostal,
+          latitud: lat,
+          longitud: lon,
+        },
+      });
+
 
       // 5. Actualizar propiedad
       const updatedProperty = await prisma.alojamiento.update({
@@ -177,10 +180,7 @@ export const deleteProperty = async (req: Request, res: Response): Promise<void>
     res.status(500).json({ message: "Error al eliminar el alojamiento", error: error.message });
   }
 };
-export const getProperties = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getProperties = async (req: Request, res: Response): Promise<void> => {
   try {
     const {
       priceMin,
@@ -190,129 +190,68 @@ export const getProperties = async (
       propertyType,
       squareFeetMin,
       squareFeetMax,
-      amenities,
-      availableFrom,
       latitude,
       longitude,
     } = req.query;
 
-    let whereConditions: Prisma.Sql[] = [];
+    const filters: any = {};
 
+    if (priceMin) filters.precio = { gte: Number(priceMin) };
+    if (priceMax) filters.precio = { ...filters.precio, lte: Number(priceMax) };
+    if (beds && beds !== "any") filters.habitaciones = { gte: Number(beds) };
+    if (baths && baths !== "any") filters.banos = { gte: Number(baths) };
+    if (squareFeetMin) filters.superficie = { gte: Number(squareFeetMin) };
+    if (squareFeetMax) filters.superficie = { ...filters.superficie, lte: Number(squareFeetMax) };
+    if (propertyType && propertyType !== "any") filters.tipoAlojamiento = propertyType;
 
-    if (priceMin) {
-      whereConditions.push(
-        Prisma.sql`p."precio" >= ${Number(priceMin)}`
-      );
-    }
+    const alojamientos = await prisma.alojamiento.findMany({
+      where: filters,
+      include: {
+        ubicacion: true,
+        propietario: true,
+      },
+    });
 
-    if (priceMax) {
-      whereConditions.push(
-        Prisma.sql`p."precio" <= ${Number(priceMax)}`
-      );
-    }
+    const withCoords = alojamientos
+      .map((a) => {
+        if (latitude && longitude) {
+          const lat = parseFloat(latitude as string);
+          const lng = parseFloat(longitude as string);
+          const delta = 0.1; // ~11 km
 
-    if (beds && beds !== "any") {
-      whereConditions.push(Prisma.sql`p.habitaciones >= ${Number(beds)}`);
-    }
+          const dentro =
+            Math.abs(a.ubicacion.latitud - lat) <= delta &&
+            Math.abs(a.ubicacion.longitud - lng) <= delta;
 
-    if (baths && baths !== "any") {
-      whereConditions.push(Prisma.sql`p.banos >= ${Number(baths)}`);
-    }
-
-    if (squareFeetMin) {
-      whereConditions.push(
-        Prisma.sql`p."superficie" >= ${Number(squareFeetMin)}`
-      );
-    }
-
-    if (squareFeetMax) {
-      whereConditions.push(
-        Prisma.sql`p."superficie" <= ${Number(squareFeetMax)}`
-      );
-    }
-
-    if (propertyType && propertyType !== "any") {
-      whereConditions.push(
-        Prisma.sql`p."tipoAlojamiento" = ${propertyType}::"TipoAlojamiento"`
-      );
-    }
-
-    if (amenities && amenities !== "any") {
-      const amenitiesArray = (amenities as string).split(",");
-      whereConditions.push(Prisma.sql`p.amenities @> ${amenitiesArray}`);
-    }
-
-    if (availableFrom && availableFrom !== "any") {
-      const availableFromDate =
-        typeof availableFrom === "string" ? availableFrom : null;
-      if (availableFromDate) {
-        const date = new Date(availableFromDate);
-        if (!isNaN(date.getTime())) {
-          whereConditions.push(
-            Prisma.sql`EXISTS (
-              SELECT 1 FROM "Lease" l 
-              WHERE l."propertyId" = p.id 
-              AND l."startDate" <= ${date.toISOString()}
-            )`
-          );
+          if (!dentro) return null;
         }
-      }
-    }
 
-    if (latitude && longitude) {
-      const lat = parseFloat(latitude as string);
-      const lng = parseFloat(longitude as string);
-      const radiusInKilometers = 1000;
-      const degrees = radiusInKilometers / 111; // Converts kilometers to degrees
+        const { latitud, longitud, ...rest } = a.ubicacion;
 
-      whereConditions.push(
-        Prisma.sql`ST_DWithin(
-          l.coordinates::geometry,
-          ST_SetSRID(ST_MakePoint(${lng}, ${lat}), 4326),
-          ${degrees}
-        )`
-      );
-    }
+        return {
+          ...a,
+          ubicacion: {
+            ...rest,
+            coordinates: {
+              latitude: latitud,
+              longitude: longitud,
+            },
+          },
+        };
+      })
+      .filter(Boolean);
 
-    const completeQuery = Prisma.sql`
-      SELECT 
-        p.*,
-        json_build_object(
-          'id', l.id,
-          'direccion', l.direccion,
-          'ciudad', l.ciudad,
-          'provincia', l.provincia,
-          'codigoPostal', l."codigoPostal",
-          'coordinates', json_build_object(
-            'longitude', ST_X(l.coordinates::geometry),
-            'latitude', ST_Y(l.coordinates::geometry)
-          )
-        ) as ubicacion
-      FROM "Alojamiento" p
-      JOIN "Ubicacion" l ON p."ubicacionId" = l.id
-      ${
-        whereConditions.length > 0
-          ? Prisma.sql`WHERE ${Prisma.join(whereConditions, " AND ")}`
-          : Prisma.empty
-      }
-    `;
-
-    const properties = await prisma.$queryRaw(completeQuery);
-
-    res.json(properties);
+    res.json(withCoords);
   } catch (error: any) {
-    res
-      .status(500)
-      .json({ message: `Error al recuperar los alojamientos: ${error.message}` });
+    res.status(500).json({
+      message: `Error al recuperar los alojamientos: ${error.message}`,
+    });
   }
 };
-
-export const getProperty = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+export const getProperty = async (req: Request, res: Response): Promise<void> => {
   try {
     const { id } = req.params;
+
     const property = await prisma.alojamiento.findUnique({
       where: { id: Number(id) },
       include: {
@@ -321,32 +260,29 @@ export const getProperty = async (
       },
     });
 
-    if (property) {
-      const coordinates: { coordinates: string }[] =
-        await prisma.$queryRaw`SELECT ST_asText(coordinates) as coordinates from "Ubicacion" where id = ${property.ubicacion.id}`;
-
-      const geoJSON: any = wktToGeoJSON(coordinates[0]?.coordinates || "");
-      const longitude = geoJSON.coordinates[0];
-      const latitude = geoJSON.coordinates[1];
-
-      const propertyWithCoordinates = {
-        ...property,
-        ubicacion: {
-          ...property.ubicacion,
-          coordinates: {
-            longitude,
-            latitude,
-          },
-        },
-      };
-      res.json(propertyWithCoordinates);
+    if (!property) {
+      return res.status(404).json({ message: "Alojamiento no encontrado" });
     }
+
+    const { latitud, longitud, ...restUbicacion } = property.ubicacion;
+
+    const propertyWithCoordinates = {
+      ...property,
+      ubicacion: {
+        ...restUbicacion,
+        latitud,
+        longitud,
+      },
+    };
+
+    res.json(propertyWithCoordinates);
   } catch (err: any) {
     res
       .status(500)
       .json({ message: `Error al recuperar el alojamiento: ${err.message}` });
   }
 };
+
 
 export const createProperty = (req: Request, res: Response): void => {
   const upload = getMulterForAlojamiento("temp").array("photos");

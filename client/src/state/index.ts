@@ -10,7 +10,8 @@ export interface FiltersState {
   includedExpenses: string[];
   rangoPrecio: [number, number] | [null, null];
   superficie: [number, number] | [null, null];
-  coordinates: [number, number];
+  latitud: number;
+  longitud: number;
 }
 
 interface InitialStateTypes {
@@ -30,7 +31,8 @@ export const initialState: InitialStateTypes = {
     includedExpenses: [],
     rangoPrecio: [null, null],
     superficie: [null, null],
-    coordinates: [0, 0],
+    latitud: 0,
+    longitud: 0,
   },
   isFiltersFullOpen: false,
   viewMode: "grid",

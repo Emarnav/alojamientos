@@ -18,10 +18,9 @@ export interface Ubicacion {
   provincia: string;
   pais: string;
   codigoPostal: string;
-  coordinates?: {
-    latitude: number;
-    longitude: number;
-  };}
+  latitud: number;
+  longitud: number;
+}
 
 export interface Alojamiento {
   id: number;

@@ -6,7 +6,6 @@ generator client {
 datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
-  extensions = [postgis]
 }
 
 
@@ -110,7 +109,8 @@ model Ubicacion {
   provincia    String
   pais         String
   codigoPostal String
-  coordinates  Unsupported("geography(Point, 4326)")
+  latitud   Float
+  longitud  Float
   alojamientos Alojamiento[]
 }
 
