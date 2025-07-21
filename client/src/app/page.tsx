@@ -11,8 +11,14 @@ export const metadata: Metadata = {
   description: "Encuentra el alojamiento perfecto para tu vida universitaria.",
 };
 
-const Landing = () => {
-  return <h1 style={{ color: "red" }}>Funciona la página</h1>;
-};
-
-export default Landing;
+export default function HomePage() {
+  return (
+    <div>
+      <HeroSection />
+      <FeaturesSection />
+      <DiscoverSection />
+      <CallToActionSection />
+      <FooterSection />
+    </div>
+  );
+}
