@@ -31,8 +31,8 @@ const Map = ({ alojamientos, isLoading, isError }: MapProps) => {
 
     alojamientos.forEach((alojamiento) => {
       if (
-        alojamiento.ubicacion?.coordinates?.latitude !== 0 &&
-        alojamiento.ubicacion?.coordinates?.longitude !== 0
+        alojamiento.ubicacion?.latitud !== 0 &&
+        alojamiento.ubicacion?.longitud !== 0
       ) {
         const marker = createPropertyMarker(alojamiento, map);
         const markerElement = marker.getElement();
@@ -66,8 +66,8 @@ const Map = ({ alojamientos, isLoading, isError }: MapProps) => {
 const createPropertyMarker = (alojamiento: Alojamiento, map: mapboxgl.Map) => {
   const marker = new mapboxgl.Marker()
     .setLngLat([
-      alojamiento.ubicacion?.coordinates?.longitude || 0,
-      alojamiento.ubicacion?.coordinates?.latitude || 0,
+      alojamiento.ubicacion?.latitud || 0,
+      alojamiento.ubicacion?.longitud || 0,
     ])
     .setPopup(
       new mapboxgl.Popup().setHTML(
