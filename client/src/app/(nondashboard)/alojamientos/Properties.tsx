@@ -6,7 +6,7 @@ import { setFilters } from "@/state";
 import { cleanParams, getAbsoluteImageUrls } from "@/lib/utils";
 import { useSearchParams } from "next/navigation";
 import FiltersFull from "./FiltersFull";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 
@@ -14,13 +14,9 @@ const ListadoAlojamientos = () => {
   const searchParams = useSearchParams();
   const dispatch = useAppDispatch();
   const filters = useAppSelector((state) => state.global.filters);
+  const [filtersReady, setFiltersReady] = useState(false);
 
-  const {
-    data: alojamientos,
-    isLoading,
-    isError,
-  } = useGetPropertiesQuery(filters);
-  
+  // Cargar filtros desde URL al montar
   useEffect(() => {
     const initialFilters = Array.from(searchParams.entries()).reduce(
       (acc: any, [key, value]) => {
@@ -38,7 +34,19 @@ const ListadoAlojamientos = () => {
 
     const cleanedFilters = cleanParams(initialFilters);
     dispatch(setFilters(cleanedFilters));
+    setFiltersReady(true);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // No lanzar la query hasta que tengamos filtros cargados
+  const {
+    data: alojamientos,
+    isLoading,
+    isError,
+  } = useGetPropertiesQuery(filters, {
+    skip: !filtersReady,
+  });
+
+  if (!filtersReady) return <p className="px-5 py-10">Cargando filtros...</p>;
 
   return (
     <div className="w-full min-h-screen px-5 py-4 flex gap-6">
@@ -49,10 +57,9 @@ const ListadoAlojamientos = () => {
         </div>
       </div>
 
-
       {/* Resultados a la derecha */}
       <div className="w-8/12 flex flex-col gap-8">
-        {isLoading && <p>Cargando...</p>}
+        {isLoading && <p>Cargando alojamientos...</p>}
         {isError || !alojamientos ? (
           <p>Error al cargar alojamientos.</p>
         ) : (
@@ -133,7 +140,7 @@ const ListadoAlojamientos = () => {
                     </div>
 
                     <div className="flex flex-wrap gap-2">
-                      {[
+                      {[ 
                         ["hayInternet", "Internet"],
                         ["hayTerraza", "Terraza"],
                         ["hayLavadora", "Lavadora"],

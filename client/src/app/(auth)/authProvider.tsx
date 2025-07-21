@@ -189,8 +189,7 @@ useEffect(() => {
       }
 
       const payload: any = jwtDecode(idToken);
-
-      const role = payload["custom:role"]?.toLowerCase();
+      const role = payload["custom:role"];
       const nombre = payload.name;
       const email = payload.email;
 
@@ -199,12 +198,12 @@ useEffect(() => {
         return;
       }
 
-      if (role !== "estudiante" && role !== "propietario") {
+      if (role !== "Estudiante" && role !== "Propietario") {
         console.warn("Rol no válido:", role);
         return;
       }
 
-      const endpoint = role === "estudiante" ? "/estudiante" : "/propietario";
+      const endpoint = role === "Estudiante" ? "/estudiante" : "/propietario";
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}${endpoint}`, {
         method: "POST",
