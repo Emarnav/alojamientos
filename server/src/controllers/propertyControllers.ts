@@ -8,7 +8,7 @@ import fs from "fs";
 
 const prisma = new PrismaClient();
 
-export const updateProperty = (req: Request, res: Response): void => {
+export const updateProperty = async (req: Request, res: Response): Promise<void> => {
   const alojamientoId = Number(req.params.id);
   const upload = getMulterForAlojamiento(alojamientoId).array("photos");
 
