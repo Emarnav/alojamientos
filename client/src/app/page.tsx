@@ -12,15 +12,7 @@ export const metadata: Metadata = {
 };
 
 const Landing = () => {
-  return (
-    <div>
-      <HeroSection />
-      <FeaturesSection />
-      <DiscoverSection />
-      <CallToActionSection />
-      <FooterSection />
-    </div>
-  );
+  return <h1 style={{ color: "red" }}>Funciona la página</h1>;
 };
 
 export default Landing;
