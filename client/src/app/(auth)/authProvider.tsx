@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { Amplify } from "aws-amplify";
 import {
   Authenticator,
   Heading,
@@ -19,15 +18,6 @@ import { jwtDecode } from "jwt-decode";
 
 I18n.putVocabularies(translations);
 I18n.setLanguage("es");
-
-Amplify.configure({
-  Auth: {
-    Cognito: {
-      userPoolId: process.env.NEXT_PUBLIC_AWS_COGNITO_USER_POOL_ID!,
-      userPoolClientId: process.env.NEXT_PUBLIC_AWS_COGNITO_USER_POOL_CLIENT_ID!,
-    },
-  },
-});
 
 const components = {
   Header() {
@@ -165,88 +155,73 @@ interface AuthProps {
   children?: React.ReactNode;
 }
 
-const Auth = ({ children }: AuthProps) => {
+const Auth = ({ children }: { children?: React.ReactNode }) => {
   const { user } = useAuthenticator((context) => [context.user]);
   const router = useRouter();
   const pathname = usePathname();
 
   const isAuthPage = pathname.match(/^\/(login|registro|recuperar-contrasena)$/);
-  const isDashboardPage =
-    pathname.startsWith("/propietario") || pathname.startsWith("/estudiante") || pathname.startsWith("/admin");
 
-useEffect(() => {
-  // Solo ejecutar si estamos en páginas de auth Y el usuario ya está autenticado
-  if (!isAuthPage || !user) return;
+  useEffect(() => {
+    if (!isAuthPage || !user) return;
 
-  const crearUsuarioEnBD = async () => {
-    try {
+    const crearUsuarioEnBD = async () => {
+      try {
+        const session = await fetchAuthSession();
+        const idToken = session.tokens?.idToken?.toString();
+        if (!idToken) return;
 
-      const session = await fetchAuthSession();
-      const idToken = session.tokens?.idToken?.toString();
-      if (!idToken) {
-        console.warn("No se encontró el idToken");
-        return;
+        const payload: any = jwtDecode(idToken);
+        const { email, name, ["custom:role"]: role } = payload;
+
+        if (!email || !name || !role) return;
+        if (role !== "Estudiante" && role !== "Propietario") return;
+
+        const endpoint = role === "Estudiante" ? "/estudiante" : "/propietario";
+
+        await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}${endpoint}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
+          },
+          body: JSON.stringify({ nombre: name, telefono: "" }),
+        });
+      } catch (err) {
+        console.error("Error creando usuario:", err);
       }
+    };
 
-      const payload: any = jwtDecode(idToken);
-      const role = payload["custom:role"];
-      const nombre = payload.name;
-      const email = payload.email;
+    crearUsuarioEnBD();
+  }, [isAuthPage, user]);
 
-      if (!role || !nombre || !email) {
-        console.warn("Faltan datos necesarios en el payload:", { role, nombre, email });
-        return;
-      }
-
-      if (role !== "Estudiante" && role !== "Propietario") {
-        console.warn("Rol no válido:", role);
-        return;
-      }
-
-      const endpoint = role === "Estudiante" ? "/estudiante" : "/propietario";
-
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}${endpoint}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${idToken}`,
-        },
-        body: JSON.stringify({ nombre, telefono: "" }),
-      });
-
-    } catch (error) {
-      console.error("Error en creación de usuario:", error);
-    }
-  };
-
-  crearUsuarioEnBD();
-}, [isAuthPage, user]);
-
-
-  // 🔁 Redirección si ya ha iniciado sesión y está en página de login
   useEffect(() => {
     if (user && isAuthPage) {
       router.push("/");
     }
   }, [user, isAuthPage, router]);
 
+  if (isAuthPage) {
+    return (
+      <div className="h-full">
+        <Authenticator
+          initialState={
+            pathname.includes("registro")
+              ? "signUp"
+              : pathname.includes("recuperar-contrasena")
+              ? "forgotPassword"
+              : "signIn"
+          }
+          components={components}
+          formFields={formFields}
+        />
+      </div>
+    );
+  }else{
+    return <div>{children}</div>;
 
-  return (
-    <div className="h-full">
-      <Authenticator
-        initialState={
-          pathname.includes("registro")
-            ? "signUp"
-            : pathname.includes("recuperar-contrasena")
-            ? "forgotPassword"
-            : "signIn"
-        }
-        components={components}
-        formFields={formFields}
-      >
-      </Authenticator>
-    </div>
-  );
+  }
+
 };
 
 export default Auth;

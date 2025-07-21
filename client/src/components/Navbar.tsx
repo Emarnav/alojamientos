@@ -136,7 +136,7 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <Link href="/signin">
+              <Link href="/login">
                 <Button
                   variant="outline"
                   className="text-white border-white bg-transparent hover:bg-white hover:text-primary-700 rounded-lg"
@@ -144,7 +144,7 @@ const Navbar = () => {
                   Iniciar sesión
                 </Button>
               </Link>
-              <Link href="/signup">
+              <Link href="/registro">
                 <Button
                   variant="secondary"
                   className="text-white bg-secondary-600 hover:bg-white hover:text-primary-700 rounded-lg"

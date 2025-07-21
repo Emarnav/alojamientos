@@ -35,16 +35,19 @@ export default function RootLayout({
       >
 
         <Providers>
-          <SidebarProvider>
-            <Navbar />
-            <main
-              className="h-full w-full flex flex-col"
-              style={{ paddingTop: `${NAVBAR_HEIGHT}px` }}
-            >
-              {children}
-            </main>
-          </SidebarProvider>
+          <div>
+            <SidebarProvider>
+              <Navbar />
+              <main
+                className="h-full w-full flex flex-col"
+                style={{ paddingTop: `${NAVBAR_HEIGHT}px` }}
+              >
+                {children}
+              </main>
+            </SidebarProvider>
+          </div>
         </Providers>
+
         <Toaster closeButton />
       </body>
     </html>

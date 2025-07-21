@@ -17,7 +17,8 @@ export const api = createApi({
       try {
         const session = await fetchAuthSession();
         const { idToken } = session.tokens ?? {};
-
+        console.log("Session:", session);
+        console.log("ID Token:", idToken);
         if (idToken) {
           headers.set("Authorization", `Bearer ${idToken}`);
         }

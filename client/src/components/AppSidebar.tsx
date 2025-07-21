@@ -28,13 +28,13 @@ const AppSidebar = ({ userType }: { userType: string }) => {
   const { toggleSidebar, open } = useSidebar();
 
   const navLinks =
-    userType === "Propietario"
+    userType === "propietario"
       ? [
           { icon: Building, label: "Alojamientos", href: "/propietario/alojamientos" },
           { icon: FileText, label: "Solicitudes", href: "/propietario/solicitudes" },
           { icon: Settings, label: "Configuración", href: "/propietario/configuracion" },
         ]
-      : userType === "Estudiante"
+      : userType === "estudiante"
       ? [
           { icon: FileText, label: "Solicitudes", href: "/estudiante/solicitudes" },
           { icon: Settings, label: "Configuración", href: "/estudiante/configuracion" },

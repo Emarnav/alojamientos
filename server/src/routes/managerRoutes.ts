@@ -9,10 +9,10 @@ import { authMiddleware, extractUserFromToken } from "../middleware/authMiddlewa
 
 const router = express.Router();
 
-// Rutas protegidas: solo usuarios con tipo 'Propietario' pueden acceder
-router.get("/:cognitoId", authMiddleware(["Propietario"]), getManager);
-router.put("/:cognitoId", authMiddleware(["Propietario"]), updateManager);
-router.get("/:cognitoId/alojamientos", authMiddleware(["Propietario"]), getManagerProperties);
+// Rutas protegidas
+router.get("/:cognitoId", authMiddleware(["propietario"]), getManager);
+router.put("/:cognitoId", authMiddleware(["propietario"]), updateManager);
+router.get("/:cognitoId/alojamientos", authMiddleware(["propietario"]), getManagerProperties);
 
 // Ruta abierta para registro (sin necesidad de que exista en la BD todavía)
 router.post("/", extractUserFromToken, createManager);
