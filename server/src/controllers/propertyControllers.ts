@@ -261,6 +261,7 @@ export const getProperty = async (req: Request, res: Response): Promise<void> =>
 
     if (!property) {
       res.status(404).json({ message: "Alojamiento no encontrado" });
+      return;
     }
 
     const { latitud, longitud, ...restUbicacion } = property.ubicacion;
