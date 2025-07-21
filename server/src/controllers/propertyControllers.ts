@@ -8,7 +8,7 @@ import fs from "fs";
 
 const prisma = new PrismaClient();
 
-export const updateProperty = async (req: Request, res: Response): Promise<void> => {
+export const updateProperty = (req: Request, res: Response): void => {
   const alojamientoId = Number(req.params.id);
   const upload = getMulterForAlojamiento(alojamientoId).array("photos");
 
@@ -258,10 +258,6 @@ export const getProperty = async (req: Request, res: Response): Promise<void> =>
         propietario: true,
       },
     });
-
-    if (!property) {
-      return res.status(404).json({ message: "Alojamiento no encontrado" });
-    }
 
     const { latitud, longitud, ...restUbicacion } = property.ubicacion;
 
