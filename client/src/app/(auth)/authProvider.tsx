@@ -151,10 +151,6 @@ const formFields = {
   },
 };
 
-interface AuthProps {
-  children?: React.ReactNode;
-}
-
 const Auth = ({ children }: { children?: React.ReactNode }) => {
   const { user } = useAuthenticator((context) => [context.user]);
   const router = useRouter();
@@ -169,15 +165,16 @@ const Auth = ({ children }: { children?: React.ReactNode }) => {
       try {
         const session = await fetchAuthSession();
         const idToken = session.tokens?.idToken?.toString();
+        
         if (!idToken) return;
 
         const payload: any = jwtDecode(idToken);
         const { email, name, ["custom:role"]: role } = payload;
 
         if (!email || !name || !role) return;
-        if (role !== "Estudiante" && role !== "Propietario") return;
+        if (role.toLowerCase() !== "estudiante" && role.toLowerCase() !== "propietario") return;
 
-        const endpoint = role === "Estudiante" ? "/estudiante" : "/propietario";
+        const endpoint = role === "estudiante" ? "/estudiante" : "/propietario";
 
         await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}${endpoint}`, {
           method: "POST",

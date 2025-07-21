@@ -18,17 +18,17 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     if (authUser) {
       const userRole = authUser.userRole?.toLowerCase();
 
-      if (userRole === "Admin") {
+      if (userRole === "admin") {
         setIsLoading(false);
         return;
       }
 
       if (
-        (userRole === "Propietario" && pathname.startsWith("/estudiante")) ||
-        (userRole === "Estudiante" && pathname.startsWith("/propietario"))
+        (userRole === "propietario" && pathname.startsWith("/estudiante")) ||
+        (userRole === "estudiante" && pathname.startsWith("/propietario"))
       ) {
         router.push(
-          userRole === "Propietario"
+          userRole === "propietario"
             ? "/propietario/alojamientos"
             : "/estudiante/solicitudes",
           { scroll: false }
@@ -46,7 +46,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     <SidebarProvider>
       <div className="min-h-screen w-full bg-primary-100">
         <Navbar />
-        <div style={{ marginTop: `${NAVBAR_HEIGHT}px` }}>
+        <div>
           <main className="flex">
             <Sidebar userType={authUser.userRole.toLowerCase()} />
             <div className="flex-grow transition-all duration-300">
