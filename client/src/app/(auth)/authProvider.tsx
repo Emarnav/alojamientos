@@ -215,7 +215,7 @@ const Auth = ({ children }: { children?: React.ReactNode }) => {
       </div>
     );
   }else{
-    return <div>{children}</div>;
+    return <>{children}</>;
 
   }
 
