@@ -13,7 +13,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (authLoading) return; 
+    if (authLoading) return;
 
     if (!authUser) {
       setIsLoading(false);
@@ -21,11 +21,11 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     }
 
     const userRole = authUser.userRole?.toLowerCase();
-    
-    if (userRole === "Propietario" && pathname === "/") {
+
+    if (userRole === "propietario" && pathname === "/") {
       router.push("/propietario/alojamientos", { scroll: false });
     } else {
-      setIsLoading(false); 
+      setIsLoading(false);
     }
   }, [authUser, authLoading, router, pathname]);
 
