@@ -16,7 +16,6 @@ Amplify.configure({
 });
 
 const Providers = ({ children }: { children: React.ReactNode }) => {
-  console.log("AUTH PROVIDER CHILDREN:", children);
 
   return (
     <StoreProvider>

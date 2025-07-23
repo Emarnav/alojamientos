@@ -31,37 +31,35 @@ const DiscoverSection = () => {
       <div className="max-w-6xl xl:max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 xl:px-16">
         <motion.div variants={itemVariants} className="my-12 text-center">
           <h2 className="text-3xl font-semibold leading-tight text-gray-800">
-            Discover
+            Encuentra o publica alojamientos fácilmente
           </h2>
           <p className="mt-4 text-lg text-gray-600">
-            Find your Dream Rental Property Today!
+            Nuestra plataforma conecta a estudiantes con propietarios de forma ágil y segura.
           </p>
           <p className="mt-2 text-gray-500 max-w-3xl mx-auto">
-            Searching for your dream rental property has never been easier. With
-            our user-friendly search feature, you can quickly find the perfect
-            home that meets all your needs. Start your search today and discover
-            your dream rental property!
+            Si eres estudiante, podrás descubrir alojamientos ideales cerca de tu universidad. 
+            Si eres propietario, tendrás un espacio donde publicar tus propiedades y gestionar los contactos fácilmente.
           </p>
         </motion.div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 xl:gap-16 text-center">
           {[
             {
               imageSrc: "/landing-icon-wand.png",
-              title: "Search for Properties",
+              title: "Explora alojamientos",
               description:
-                "Browse through our extensive collection of rental properties in your desired location.",
+                "Consulta propiedades disponibles filtrando por ubicación, precio o servicios incluidos.",
             },
             {
               imageSrc: "/landing-icon-calendar.png",
-              title: "Book Your Rental",
+              title: "Contacta rápidamente",
               description:
-                "Once you've found the perfect rental property, easily book it online with just a few clicks.",
+                "Inicia una conversación con el propietario o solicita más información en segundos.",
             },
             {
               imageSrc: "/landing-icon-heart.png",
-              title: "Enjoy your New Home",
+              title: "Publica tu alojamiento",
               description:
-                "Move into your new rental property and start enjoying your dream home.",
+                "Si tienes una propiedad disponible, publícala fácilmente y empieza a recibir mensajes.",
             },
           ].map((card, index) => (
             <motion.div key={index} variants={itemVariants}>

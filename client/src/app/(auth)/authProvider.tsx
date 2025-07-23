@@ -15,27 +15,28 @@ import { I18n } from "aws-amplify/utils";
 import { translations } from "@aws-amplify/ui-react";
 import { fetchAuthSession, signOut } from "aws-amplify/auth";
 import { jwtDecode } from "jwt-decode";
+import { NAVBAR_HEIGHT } from "@/lib/constants";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+
 
 I18n.putVocabularies(translations);
 I18n.setLanguage("es");
 
 const components = {
-  Header() {
-    return (
-      <View className="mt-4 mb-7 !text-center">
-        <Heading level={3} className="!text-2xl !font-bold">
-          UCH
-          <span className="text-secondary-500 font-light hover:!text-primary-300">
-            CEU
-          </span>
-        </Heading>
-        <p className="text-muted-foreground mt-2">
-          <span className="font-bold">¡Bienvenido!</span> Accede o regístrate para explorar las propiedades disponibles.
-        </p>
-      </View>
-    );
-  },
   SignIn: {
+    Header() {
+      return (
+        <View className="mt-4 mb-7 !text-center">
+          <Heading level={1} className="!text-2xl !font-bold">
+            Inicio de sesión
+          </Heading>
+          <p className="text-muted-foreground mt-2">
+            <span className="font-bold">¡Bienvenido!</span> Accede o regístrate para explorar las propiedades disponibles.
+          </p>
+        </View>
+      );
+    },
     Footer() {
       const { toSignUp, toForgotPassword } = useAuthenticator();
       return (
@@ -61,10 +62,22 @@ const components = {
       );
     },
   },
+
   SignUp: {
+    Header() {
+      return (
+        <View className="mt-4 mb-7 !text-center">
+          <Heading level={1} className="!text-2xl !font-bold">
+            Registro
+          </Heading>
+          <p className="text-muted-foreground mt-2">
+            <span className="font-bold">¡Bienvenido!</span> Crea una cuenta para contactar con propietarios de alojamientos.
+          </p>
+        </View>
+      );
+    },
     FormFields() {
       const { validationErrors } = useAuthenticator();
-
       return (
         <>
           <Authenticator.SignUp.FormFields />
@@ -98,6 +111,7 @@ const components = {
       );
     },
   },
+
 };
 
 const formFields = {
@@ -200,18 +214,22 @@ const Auth = ({ children }: { children?: React.ReactNode }) => {
 
   if (isAuthPage) {
     return (
-      <div className="h-full">
-        <Authenticator
-          initialState={
-            pathname.includes("registro")
-              ? "signUp"
-              : pathname.includes("recuperar-contrasena")
-              ? "forgotPassword"
-              : "signIn"
-          }
-          components={components}
-          formFields={formFields}
-        />
+      <div className="flex flex-col min-h-screen" style={{ paddingTop: `${NAVBAR_HEIGHT}px` }}>
+        <Navbar />
+        <main className="flex-grow flex items-center justify-center">
+          <Authenticator
+            initialState={
+              pathname.includes("registro")
+                ? "signUp"
+                : pathname.includes("recuperar-contrasena")
+                ? "forgotPassword"
+                : "signIn"
+            }
+            components={components}
+            formFields={formFields}
+          />
+        </main>
+        <Footer />
       </div>
     );
   }else{

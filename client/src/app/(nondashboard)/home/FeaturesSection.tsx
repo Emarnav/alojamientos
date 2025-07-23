@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import Link from "next/link"; // ✅ Añadido
+import Link from "next/link"; 
 import { useGetPropertiesQuery } from "@/state/api";
 import { Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ const FeaturedSection = () => {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-10">
             {destacados.map((alojamiento: any) => (
               <StudentCard
-                key={alojamiento.id} // ✅ Añadido
+                key={alojamiento.id} 
                 alojamiento={alojamiento}
               />
             ))}
@@ -45,7 +45,7 @@ const FeaturedSection = () => {
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {ultimos.map((alojamiento: any) => (
           <StudentCard
-            key={alojamiento.id} // ✅ Añadido
+            key={alojamiento.id} 
             alojamiento={alojamiento}
           />
         ))}
@@ -53,7 +53,7 @@ const FeaturedSection = () => {
 
       <div className="mt-10 text-center">
         <Button asChild>
-          <Link href="/alojamientos">Ver todos los alojamientos</Link> {/* ✅ Sustituido <a> por <Link> */}
+          <Link href="/alojamientos">Ver todos los alojamientos</Link> 
         </Button>
       </div>
     </section>

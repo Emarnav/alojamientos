@@ -37,8 +37,7 @@ const StudentCard = ({
   const [showChat, setShowChat] = useState(false);
 
   return (
-    <>
-    <div className="bg-white rounded-xl overflow-hidden shadow-lg w-full mb-5">
+      <div className="bg-white rounded-xl overflow-hidden shadow-lg w-full mb-5">
         {/* Imagen */}
         <div className="relative w-full h-48">
           <Image
@@ -112,30 +111,28 @@ const StudentCard = ({
           </div>  
 
         </div>
+        {/* Modal de chat */}
+        {showChat && conversacionId !== undefined &&
+          createPortal(
+            <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
+              <div className="relative w-full max-w-2xl mx-auto">
+                <button
+                  onClick={() => setShowChat(false)}
+                  className="absolute top-2 right-2 text-white bg-black/70 rounded-full p-1 hover:bg-black"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <ChatWindow
+                  conversacionId={conversacionId}
+                  remitenteId={remitenteId!}
+                  nombreReceptor={nombreReceptor!}
+                />
+              </div>
+            </div>,
+            document.body
+          )
+        }
       </div>
-
-      {/* Modal de chat */}
-      {showChat && conversacionId !== undefined &&
-        createPortal(
-          <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="relative w-full max-w-2xl mx-auto">
-              <button
-                onClick={() => setShowChat(false)}
-                className="absolute top-2 right-2 text-white bg-black/70 rounded-full p-1 hover:bg-black"
-              >
-                <X className="w-5 h-5" />
-              </button>
-              <ChatWindow
-                conversacionId={conversacionId}
-                remitenteId={remitenteId!}
-                nombreReceptor={nombreReceptor!}
-              />
-            </div>
-          </div>,
-          document.body
-        )
-      }
-    </>
   );
 };
 

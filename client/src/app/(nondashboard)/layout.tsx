@@ -1,5 +1,6 @@
 "use client";
 
+import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { NAVBAR_HEIGHT } from "@/lib/constants";
 import { useGetAuthUserQuery } from "@/state/api";
@@ -32,14 +33,15 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   if (authLoading || isLoading) return <>Cargando...</>;
 
   return (
-    <div className="container mx-auto">
+    <div>
       <Navbar />
       <main
-        className={`h-full flex w-full flex-col`}
+        className={`h-full flex w-full flex-col container mx-auto`}
         style={{ paddingTop: `${NAVBAR_HEIGHT}px` }}
       >
         {children}
       </main>
+      <Footer />
     </div>
   );
 };

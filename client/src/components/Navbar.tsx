@@ -49,21 +49,13 @@ const Navbar = () => {
             className="cursor-pointer hover:!text-primary-300"
             scroll={false}
           >
-            <div className="flex items-center gap-3">
               <Image
-                src="/logo.svg"
-                alt="Rentiful Logo"
-                width={24}
-                height={24}
-                className="w-6 h-6"
+                src="/logo.webp"
+                alt="UCHCEU Logo"
+                width={160}
+                height={40}
+                className="object-contain"
               />
-              <div className="text-xl font-bold">
-                UCH
-                <span className="text-secondary-500 font-light hover:!text-primary-300">
-                  CEU
-                </span>
-              </div>
-            </div>
           </Link>
           {isDashboardPage && authUser && (
             <Button

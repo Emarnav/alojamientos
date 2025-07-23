@@ -10,11 +10,11 @@ const CallToActionSection = () => {
     <div className="relative py-24">
       <Image
         src="/landing-call-to-action.jpg"
-        alt="Rentiful Search Section Background"
+        alt="Fondo propietarios CEU"
         fill
         className="object-cover object-center"
       />
-      <div className="absolute inset-0 bg-black bg-opacity-60"></div>
+      <div className="absolute inset-0 bg-black bg-opacity-60" />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         transition={{ duration: 0.5 }}
@@ -25,27 +25,27 @@ const CallToActionSection = () => {
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="mb-6 md:mb-0 md:mr-10">
             <h2 className="text-2xl font-bold text-white">
-              Find Your Dream Rental Property
+              ¿Tienes un alojamiento disponible?
             </h2>
           </div>
           <div>
             <p className="text-white mb-3">
-              Discover a wide range of rental properties in your desired
-              location.
+              Regístrate como propietario y publica tu alojamiento para recibir solicitudes de estudiantes interesados.
             </p>
             <div className="flex justify-center md:justify-start gap-4">
-              <button
-                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                className="inline-block text-primary-700 bg-white rounded-lg px-6 py-3 font-semibold hover:bg-primary-500 hover:text-primary-50"
-              >
-                Search
-              </button>
               <Link
-                href="/signup"
+                href="/registro"
+                className="inline-block text-primary-700 bg-white rounded-lg px-6 py-3 font-semibold hover:bg-primary-500 hover:text-white"
+                scroll={false}
+              >
+                Crear cuenta
+              </Link>
+              <Link
+                href="/login"
                 className="inline-block text-white bg-secondary-500 rounded-lg px-6 py-3 font-semibold hover:bg-secondary-600"
                 scroll={false}
               >
-                Sign Up
+                Ya tengo cuenta
               </Link>
             </div>
           </div>
