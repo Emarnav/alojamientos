@@ -1,9 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  devIndicators: {
-    buildActivity: false,
-  },
   images: {
     domains: ["localhost", "alojamientos-lemon.vercel.app"], // añade aquí tu dominio real
     remotePatterns: [
