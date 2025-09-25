@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+<<<<<<< HEAD
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -15,6 +16,8 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+=======
+>>>>>>> 5674c29b0fd5f4e0011b167a0001a372e9f227f2
   images: {
     domains: ["localhost"], 
     remotePatterns: [
