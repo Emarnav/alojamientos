@@ -1,12 +1,6 @@
 {
-<<<<<<< HEAD
   "app_type": "node",
   "startup_file": "app.js",
   "app_root": "/",
   "node_version": "18"
 }
-=======
-  "startup_file": "server.js",
-  "node_version": "18.17.1"
-}
->>>>>>> 5674c29b0fd5f4e0011b167a0001a372e9f227f2

@@ -62,7 +62,7 @@ app.use(helmet({
 // CORS configuration
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? process.env.CLIENT_URL || true
+    ? ['https://alojamientos.uchceu.es', 'https://www.alojamientos.uchceu.es']
     : ['http://localhost:3001', 'http://localhost:3000', 'http://localhost:3004'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
