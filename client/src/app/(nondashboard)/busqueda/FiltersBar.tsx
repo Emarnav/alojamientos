@@ -11,7 +11,7 @@ import { useDispatch } from "react-redux";
 import { debounce } from "lodash";
 import { cleanParams, cn, formatPriceValue } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Filter, Grid, List, Search } from "lucide-react";
+import { Filter, Grid, List, Search, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -97,169 +97,105 @@ const FiltersBar = () => {
   };
 
   return (
-    <div className="flex justify-between items-center w-full py-5">
-      {/* Filters */}
-      <div className="flex justify-between items-center gap-4 p-2">
-        {/* All Filters */}
-        <Button
-          variant="outline"
-          className={cn(
-            "gap-2 rounded-xl border-primary-400 hover:bg-primary-500 hover:text-primary-100",
-            isFiltersFullOpen && "bg-primary-700 text-primary-100"
-          )}
-          onClick={() => dispatch(toggleFiltersFullOpen())}
-        >
-          <Filter className="w-4 h-4" />
-          <span>Todos los filtros</span>
-        </Button>
+    <div className="w-full py-4 bg-white border-b border-gray-200">
+      <div className="max-w-full mx-auto px-4">
+        {/* Mobile/Tablet responsive layout */}
+        <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+          
+          {/* Main filters row */}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* All Filters button */}
+            <Button
+              variant="outline"
+              className={cn(
+                "gap-2 px-4 py-2 text-sm border-gray-200 hover:bg-gray-50",
+                isFiltersFullOpen && "bg-primary text-white border-primary"
+              )}
+              onClick={() => dispatch(toggleFiltersFullOpen())}
+            >
+              <Filter className="w-4 h-4" />
+              <span className="hidden sm:inline">Filtros</span>
+            </Button>
 
-        {/* Search Location */}
-        <div className="flex items-center">
-          <Input
-            placeholder="Buscar ubicación"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="w-40 rounded-l-xl rounded-r-none border-primary-400 border-r-0"
-          />
-          <Button
-            onClick={handleLocationSearch}
-            className={`rounded-r-xl rounded-l-none border-l-none border-primary-400 shadow-none 
-              border hover:bg-primary-700 hover:text-primary-50`}
-          >
-            <Search className="w-4 h-4" />
-          </Button>
-        </div>
-
-        {/* Price Range */}
-        <div className="flex gap-1">
-          {/* Minimum Price Selector */}
-          <Select
-            value={filters.rangoPrecio[0]?.toString() || "any"}
-            onValueChange={(value) =>
-              handleFilterChange("priceRange", value, true)
-            }
-          >
-            <SelectTrigger className="w-22 rounded-xl border-primary-400">
-              <SelectValue>
-                {formatPriceValue(filters.rangoPrecio[0], true)}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent className="bg-white">
-              <SelectItem value="any">Sin precio mínimo</SelectItem>
-              {[200, 400, 600, 800].map((price) => (
-                <SelectItem key={price} value={price.toString()}>
-                  {price} €
-                </SelectItem>
+            {/* Province Quick Filter - responsive */}
+            <div className="flex gap-2 bg-gray-50 p-1 rounded-lg border">
+              {[
+                { value: "any", label: "Todas", shortLabel: "Todas" },
+                { value: "Valencia", label: "Valencia", shortLabel: "VLC" },
+                { value: "Alicante", label: "Alicante", shortLabel: "ALC" },
+                { value: "Castellón", label: "Castellón", shortLabel: "CS" }
+              ].map((province) => (
+                <Button
+                  key={province.value}
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    "px-2 sm:px-3 py-1 text-xs sm:text-sm rounded-md transition-colors",
+                    filters.provincia === province.value 
+                      ? "bg-primary text-white" 
+                      : "text-gray-700 hover:bg-white hover:text-primary"
+                  )}
+                  onClick={() => handleFilterChange("provincia", province.value, null)}
+                >
+                  <span className="hidden sm:inline">{province.label}</span>
+                  <span className="sm:hidden">{province.shortLabel}</span>
+                </Button>
               ))}
-            </SelectContent>
-          </Select>
+            </div>
 
-          {/* Maximum Price Selector */}
-          <Select
-            value={filters.rangoPrecio[1]?.toString() || "any"}
-            onValueChange={(value) =>
-              handleFilterChange("priceRange", value, false)
-            }
-          >
-            <SelectTrigger className="w-22 rounded-xl border-primary-400">
-              <SelectValue>
-                {formatPriceValue(filters.rangoPrecio[1], false)}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent className="bg-white">
-              <SelectItem value="any">Sin precio máximo</SelectItem>
-              {[1000, 2000, 3000, 5000, 10000].map((price) => (
-                <SelectItem key={price} value={price.toString()}>
-                  &lt;{price} €
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+            {/* Search Location - responsive */}
+            <div className="flex items-center bg-gray-50 rounded-lg border overflow-hidden min-w-0 flex-1 lg:flex-none lg:w-auto">
+              <div className="flex items-center pl-3">
+                <MapPin className="w-4 h-4 text-gray-400" />
+              </div>
+              <Input
+                placeholder="Buscar ubicación..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="w-full sm:w-48 border-none bg-transparent focus:ring-0 text-sm h-9"
+                onKeyPress={(e) => e.key === 'Enter' && handleLocationSearch()}
+              />
+              <Button
+                onClick={handleLocationSearch}
+                size="sm"
+                className="m-0.5 h-8 px-3 bg-primary hover:bg-primary/90 text-white"
+              >
+                <Search className="w-3 h-3" />
+              </Button>
+            </div>
+          </div>
 
-        {/* Beds and Baths */}
-        <div className="flex gap-1">
-          {/* Beds */}
-          <Select
-            value={filters.habitaciones}
-            onValueChange={(value) => handleFilterChange("habitaciones", value, null)}
-          >
-            <SelectTrigger className="w-26 rounded-xl border-primary-400">
-              <SelectValue placeholder="Habitaciones" />
-            </SelectTrigger>
-            <SelectContent className="bg-white">
-              <SelectItem value="any">Cualquier núm. de habitaciones</SelectItem>
-              <SelectItem value="1">+1 habitación</SelectItem>
-              <SelectItem value="2">+2 habitaciones</SelectItem>
-              <SelectItem value="3">+3 habitaciones</SelectItem>
-              <SelectItem value="4">+4 habitaciones</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Baths */}
-          <Select
-            value={filters.banos}
-            onValueChange={(value) => handleFilterChange("banos", value, null)}
-          >
-            <SelectTrigger className="w-26 rounded-xl border-primary-400">
-              <SelectValue placeholder="Baños" />
-            </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="any">Cualquier núm de baños</SelectItem>
-                <SelectItem value="1">+1 baño</SelectItem>
-                <SelectItem value="2">+2 baños</SelectItem>
-                <SelectItem value="3">+2 baños</SelectItem>
-              </SelectContent>
-          </Select>
-        </div>
-
-        {/* Property Type */}
-        <Select
-          value={filters.tipoAlojamiento || "any"}
-          onValueChange={(value) =>
-            handleFilterChange("tipoAlojamiento", value, null)
-          }
-        >
-          <SelectTrigger className="w-32 rounded-xl border-primary-400">
-            <SelectValue placeholder="Tipo de alojamiento" />
-          </SelectTrigger>
-          <SelectContent className="bg-white">
-            <SelectItem value="any">Cualquier tipo de alojamiento</SelectItem>
-            {Object.entries(PropertyTypeIcons).map(([type, Icon]) => (
-              <SelectItem key={type} value={type}>
-                <div className="flex items-center">
-                  <Icon className="w-4 h-4 mr-2" />
-                  <span>{type}</span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* View Mode */}
-      <div className="flex justify-between items-center gap-4 p-2">
-        <div className="flex border rounded-xl">
-          <Button
-            variant="ghost"
-            className={cn(
-              "px-3 py-1 rounded-none rounded-l-xl hover:bg-primary-600 hover:text-primary-50",
-              viewMode === "list" ? "bg-primary-700 text-primary-50" : ""
-            )}
-            onClick={() => dispatch(setViewMode("list"))}
-          >
-            <List className="w-5 h-5" />
-          </Button>
-          <Button
-            variant="ghost"
-            className={cn(
-              "px-3 py-1 rounded-none rounded-r-xl hover:bg-primary-600 hover:text-primary-50",
-              viewMode === "grid" ? "bg-primary-700 text-primary-50" : ""
-            )}
-            onClick={() => dispatch(setViewMode("grid"))}
-          >
-            <Grid className="w-5 h-5" />
-          </Button>
+          {/* View Mode - always visible on large screens, collapsible on mobile */}
+          <div className="flex bg-gray-50 p-1 rounded-lg border w-fit">
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "px-3 py-1.5 text-sm rounded-md flex items-center gap-2",
+                viewMode === "list" 
+                  ? "bg-primary text-white" 
+                  : "text-gray-700 hover:bg-white hover:text-primary"
+              )}
+              onClick={() => dispatch(setViewMode("list"))}
+            >
+              <List className="w-4 h-4" />
+              <span className="hidden sm:inline">Lista</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "px-3 py-1.5 text-sm rounded-md flex items-center gap-2",
+                viewMode === "grid" 
+                  ? "bg-primary text-white" 
+                  : "text-gray-700 hover:bg-white hover:text-primary"
+              )}
+              onClick={() => dispatch(setViewMode("grid"))}
+            >
+              <Grid className="w-4 h-4" />
+              <span className="hidden sm:inline">Grid</span>
+            </Button>
+          </div>
         </div>
       </div>
     </div>

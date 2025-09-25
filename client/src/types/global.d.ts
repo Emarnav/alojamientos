@@ -1,12 +1,4 @@
 import { LucideIcon } from "lucide-react";
-import { AuthUser } from "aws-amplify/auth";
-import { MotionProps as OriginalMotionProps } from "framer-motion";
-
-declare module "framer-motion" {
-  interface MotionProps extends OriginalMotionProps {
-    className?: string;
-  }
-}
 
 declare global {
 
@@ -106,12 +98,13 @@ declare global {
   interface CardProps {
     alojamiento: Alojamiento;
     alojamientoLink?: string;
-    context?: "public" | "admin"; 
+    context?: "public" | "admin" | "propietario" | "busqueda"; 
   }
 
   interface CardCompactProps {
     alojamiento: Alojamiento;
     alojamientoLink?: string;
+    context?: "public" | "admin" | "propietario" | "busqueda";
   }
 
   interface HeaderProps {
@@ -134,7 +127,6 @@ declare global {
   }
 
   interface User {
-    cognitoInfo: AuthUser;
     userInfo: Usuario;
     userRole: "Estudiante" | "Propietario" | "Admin";
   }

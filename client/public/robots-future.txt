@@ -1,0 +1,32 @@
+# ROBOTS.TXT PARA CUANDO EL SITIO SEA PÚBLICO
+# Reemplazar robots.txt con este archivo cuando se quiera hacer público
+
+User-agent: *
+Allow: /
+
+# Páginas permitidas
+Allow: /busqueda
+Allow: /valencia
+Allow: /alicante
+Allow: /castellon
+Allow: /alojamientos/
+
+# Páginas restringidas (solo para usuarios registrados)
+Disallow: /admin/
+Disallow: /propietario/
+Disallow: /estudiante/
+Disallow: /api/
+Disallow: /login
+Disallow: /registro
+
+# Archivos a ignorar
+Disallow: /*.json$
+Disallow: /*.xml$
+Disallow: /*?*
+Disallow: /api/
+
+# Configuración de crawl delay (opcional)
+Crawl-delay: 1
+
+# Sitemap (añadir cuando esté público)
+# Sitemap: https://tudominio.com/sitemap.xml

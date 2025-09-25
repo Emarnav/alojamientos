@@ -11,12 +11,15 @@ export interface FiltersState {
   rangoPrecio: [number, number] | [null, null];
   superficie: [number, number] | [null, null];
   coordinates: [number, number];
+  provincia?: string;
 }
 
 interface InitialStateTypes {
   filters: FiltersState;
   isFiltersFullOpen: boolean;
   viewMode: "grid" | "list";
+  mapCenterProperty: { id: number; coordinates: [number, number] } | null;
+  selectedPropertyFromMap: number | null;
 }
 
 export const initialState: InitialStateTypes = {
@@ -30,10 +33,13 @@ export const initialState: InitialStateTypes = {
     includedExpenses: [],
     rangoPrecio: [null, null],
     superficie: [null, null],
-    coordinates: [0, 0],
+    coordinates: [-0.4280276, 39.547361],
+    provincia: "any",
   },
   isFiltersFullOpen: false,
   viewMode: "grid",
+  mapCenterProperty: null,
+  selectedPropertyFromMap: null,
 };
 
 export const globalSlice = createSlice({
@@ -49,10 +55,16 @@ export const globalSlice = createSlice({
     setViewMode: (state, action: PayloadAction<"grid" | "list">) => {
       state.viewMode = action.payload;
     },
+    centerMapOnProperty: (state, action: PayloadAction<{ id: number; coordinates: [number, number] }>) => {
+      state.mapCenterProperty = action.payload;
+    },
+    selectPropertyFromMap: (state, action: PayloadAction<number | null>) => {
+      state.selectedPropertyFromMap = action.payload;
+    },
   },
 });
 
-export const { setFilters, toggleFiltersFullOpen, setViewMode } =
+export const { setFilters, toggleFiltersFullOpen, setViewMode, centerMapOnProperty, selectPropertyFromMap } =
   globalSlice.actions;
 
 export default globalSlice.reducer;

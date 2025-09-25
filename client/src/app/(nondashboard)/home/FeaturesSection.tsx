@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import StudentCard from "@/components/StudentCard";
 
 const FeaturedSection = () => {
-  const { data: alojamientos, isLoading } = useGetPropertiesQuery();
+  const { data: propertiesData, isLoading } = useGetPropertiesQuery({ limit: 50 });
 
   if (isLoading) {
     return (
@@ -18,19 +18,20 @@ const FeaturedSection = () => {
     );
   }
 
-  const destacados = alojamientos?.filter((a: any) => a.esDestacado).slice(0, 6) ?? [];
-  const ultimos =
-    alojamientos
-      ?.filter((a: any) => !a.esDestacado)
-      .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      .slice(0, 10) ?? [];
+  const alojamientos = propertiesData?.alojamientos || [];
+  
+  const destacados = alojamientos.filter((a: any) => a.esDestacado).slice(0, 6);
+  const ultimos = alojamientos
+    .filter((a: any) => !a.esDestacado)
+    .sort((a: any, b: any) => new Date(b.postedDate).getTime() - new Date(a.postedDate).getTime())
+    .slice(0, 10);
 
   return (
     <section className="py-10 px-4 max-w-7xl mx-auto">
       {destacados.length > 0 && (
         <>
           <h2 className="text-2xl font-bold mb-6">Alojamientos destacados</h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-10">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mb-10">
             {destacados.map((alojamiento: any) => (
               <StudentCard
                 key={alojamiento.id} 
@@ -42,7 +43,7 @@ const FeaturedSection = () => {
       )}
 
       <h2 className="text-2xl font-bold mb-6">Últimos alojamientos añadidos</h2>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {ultimos.map((alojamiento: any) => (
           <StudentCard
             key={alojamiento.id} 
@@ -53,7 +54,7 @@ const FeaturedSection = () => {
 
       <div className="mt-10 text-center">
         <Button asChild>
-          <Link href="/alojamientos">Ver todos los alojamientos</Link> 
+          <Link href="/busqueda">Ver todos los alojamientos</Link> 
         </Button>
       </div>
     </section>

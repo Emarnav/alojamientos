@@ -13,7 +13,6 @@ export default function HomePage() {
       <FeaturesSection />
       <DiscoverSection />
       <CallToActionSection />
-      <Footer />
     </div>
   );
 }

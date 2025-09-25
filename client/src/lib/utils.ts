@@ -82,7 +82,7 @@ export const createNewUserInDatabase = async (
   return createUserResponse;
 };
 
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") || "http://localhost:3001";
+const BASE_URL = process.env.NEXT_PUBLIC_MEDIA_BASE_URL?.replace(/\/$/, "") || "http://localhost:3001";
 
 export function getAbsoluteImageUrls(images: string[] | string): string[] {
   if (Array.isArray(images)) {

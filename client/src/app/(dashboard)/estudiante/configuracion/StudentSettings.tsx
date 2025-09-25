@@ -21,7 +21,7 @@ const StudentSettings = () => {
 
   const handleSubmit = async (data: typeof initialData) => {
     await updateStudent({
-      cognitoId: authUser!.userInfo!.cognitoId,
+      userId: authUser!.userInfo!.id,
       ...data,
     });
   };

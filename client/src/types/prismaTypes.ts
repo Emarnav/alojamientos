@@ -9,21 +9,14 @@ export interface Usuario {
   email: string;
   telefono: string | null;
   tipo: TipoUsuario;
-}
-
-export interface Ubicacion {
-  id: number;
-  direccion: string;
-  ciudad: string;
-  provincia: string;
-  pais: string;
-  codigoPostal: string;
-  latitud: number;
-  longitud: number;
+  isEmailVerified: boolean;
+  isSuspended?: boolean;
+  motivoSuspension?: string | null;
 }
 
 export interface Alojamiento {
   id: number;
+  slug: string;
   estado: string;
   motivoRechazo?: string | null;
   photoUrls: string[];
@@ -62,21 +55,30 @@ export interface Alojamiento {
   dirigidoA: string;
   infoExtra: string;
   esDestacado: boolean;
+  // Address fields (replacing ubicacion)
+  direccion: string;
+  ciudad: string;
+  provincia: string;
+  pais: string;
+  codigoPostal: string;
+  portal?: string | null;
+  piso?: string | null;
+  puerta?: string | null;
   tipoAlojamiento: string;
   managerUsuarioId: number;
   propietario?: Usuario;
-  ubicacion?: Ubicacion;
 }
 
 export interface Conversacion {
   id: number;
-  alojamientoId: number;
+  alojamientoId?: number | null; // Opcional para conversaciones admin-propietario
   estudianteId: number;
   propietarioId: number;
   createdAt: string;
   ultimoMensajeId?: number | null;
   estudianteVistoUltimo: boolean;
   propietarioVistoUltimo: boolean;
+  esConversacionAdmin: boolean; // Identifica conversaciones con admin
   alojamiento?: Alojamiento;
   estudiante?: Usuario;
   propietario?: Usuario;
@@ -104,3 +106,21 @@ export type Propietario = Usuario & {
 export type Admin = Usuario & {
   tipo: "Admin";
 };
+
+export type TipoNotificacion = "NUEVO_MENSAJE" | "NUEVA_CONVERSACION" | "PROPIEDAD_APROBADA" | "PROPIEDAD_RECHAZADA" | "NUEVA_SOLICITUD";
+
+export interface Notificacion {
+  id: number;
+  tipo: TipoNotificacion;
+  titulo: string;
+  descripcion: string;
+  isRead: boolean;
+  createdAt: string;
+  usuarioId: number;
+  conversacionId?: number | null;
+  mensajeId?: number | null;
+  alojamientoId?: number | null;
+  conversacion?: Conversacion;
+  mensaje?: Mensaje;
+  alojamiento?: Alojamiento;
+}

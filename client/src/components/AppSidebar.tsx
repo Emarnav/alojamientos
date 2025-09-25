@@ -18,6 +18,7 @@ import {
   Settings,
   Users,
   X,
+  MessageCircle,
 } from "lucide-react";
 import { NAVBAR_HEIGHT } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -31,17 +32,19 @@ const AppSidebar = ({ userType }: { userType: string }) => {
     userType === "propietario"
       ? [
           { icon: Building, label: "Alojamientos", href: "/propietario/alojamientos" },
-          { icon: FileText, label: "Solicitudes", href: "/propietario/solicitudes" },
+          { icon: FileText, label: "Chats", href: "/propietario/solicitudes" },
           { icon: Settings, label: "Configuración", href: "/propietario/configuracion" },
         ]
       : userType === "estudiante"
       ? [
-          { icon: FileText, label: "Solicitudes", href: "/estudiante/solicitudes" },
+          { icon: FileText, label: "Chats", href: "/estudiante/solicitudes" },
           { icon: Settings, label: "Configuración", href: "/estudiante/configuracion" },
         ]
       : [
           // ADMIN
           { icon: Building, label: "Alojamientos", href: "/admin/alojamientos" },
+          { icon: Users, label: "Propietarios", href: "/admin/propietarios" },
+          { icon: MessageCircle, label: "Chats", href: "/admin/chats" },
           { icon: Settings, label: "Configuración", href: "/admin/configuracion" },
         ];
 

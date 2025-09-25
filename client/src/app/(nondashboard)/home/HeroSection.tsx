@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import React, { useState } from "react";
-import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useDispatch } from "react-redux";
@@ -57,37 +56,35 @@ const HeroSection = () => {
         priority
       />
       <div className="absolute inset-0 bg-black bg-opacity-60"></div>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="absolute top-1/3 transform -translate-x-1/2 -translate-y-1/2 text-center w-full"
-      >
-        <div className="max-w-4xl mx-auto px-16 sm:px-12">
-          <h1 className="text-5xl font-bold text-white mb-4">
+      <div className="absolute top-1/3 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
             Comience su viaje para encontrar el lugar perfecto al que llamar hogar
           </h1>
-          <p className="text-xl text-white mb-8">
+          <p className="text-lg sm:text-xl text-white mb-8 opacity-90">
             Explore nuestra amplia gama de propiedades en alquiler adaptadas a su estilo de vida y necesidades.
           </p>
 
-          <div className="flex justify-center">
-            <Input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Búsqueda por ciudad, barrio o dirección"
-              className="w-full max-w-lg rounded-none rounded-l-xl border-none bg-white h-12"
-            />
-            <Button
-              onClick={handleLocationSearch}
-              className="bg-secondary-500 text-white rounded-none rounded-r-xl border-none hover:bg-secondary-600 h-12"
-            >
-              Buscar
-            </Button>
+          <div className="flex flex-col items-center max-w-2xl mx-auto">
+            <div className="flex w-full max-w-lg">
+              <Input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Búsqueda por ciudad, barrio o dirección"
+                className="flex-1 rounded-none rounded-l-xl border-none bg-white h-12 text-base"
+                onKeyPress={(e) => e.key === 'Enter' && handleLocationSearch()}
+              />
+              <Button
+                onClick={handleLocationSearch}
+                className="btn-uchceu rounded-none rounded-r-xl h-12 shadow-none border-l-0 px-6"
+              >
+                Buscar
+              </Button>
+            </div>
           </div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 };

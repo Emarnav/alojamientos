@@ -1,0 +1,66 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Production builds
+.next/
+dist/
+
+# Environment variables (NEVER commit these)
+.env
+.env.local
+.env.production
+.env.staging
+server/.env
+client/.env
+
+# Database
+*.db
+*.sqlite
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+.nyc_output
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Cache
+.cache/
+*.tsbuildinfo
+
+# Uploads and temporary files
+uploads/
+temp/
+tmp/
+
+# Public uploads (keep structure but ignore content)
+server/public/alojamientos/*/
+!server/public/alojamientos/.gitkeep
+
+# Build tools
+.parcel-cache
+
+# Testing
+.jest-cacheserver/.env
+client/.env

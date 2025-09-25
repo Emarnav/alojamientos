@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import UpdateProperty from "./UpdateProperty";
+import SuspensionGuard from "@/components/SuspensionGuard";
 
 export const metadata: Metadata = {
   title: "Gestión de Estudiantes | Propietario | UCH-CEU",
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <UpdateProperty />;
+  return (
+    <SuspensionGuard>
+      <UpdateProperty />
+    </SuspensionGuard>
+  );
 }

@@ -168,9 +168,52 @@ const FiltersFull = () => {
             }
           />
           <div className="flex justify-between mt-2">
-            <span>${localFilters.rangoPrecio[0] ?? 0}</span>
-            <span>${localFilters.rangoPrecio[1] ?? 10000}</span>
+            <span>{localFilters.rangoPrecio[0] ?? 0}€</span>
+            <span>{localFilters.rangoPrecio[1] ?? 10000}€</span>
           </div>
+        </div>
+
+        {/* Habitaciones */}
+        <div>
+          <h4 className="font-bold mb-2">Habitaciones</h4>
+          <Select
+            value={localFilters.habitaciones}
+            onValueChange={(value) =>
+              setLocalFilters((prev) => ({ ...prev, habitaciones: value }))
+            }
+          >
+            <SelectTrigger className="w-full rounded-xl border-gray-300">
+              <SelectValue placeholder="Selecciona habitaciones" />
+            </SelectTrigger>
+            <SelectContent className="bg-white rounded-xl border-0 shadow-lg">
+              <SelectItem value="any">Cualquier número de habitaciones</SelectItem>
+              <SelectItem value="1">+1 habitación</SelectItem>
+              <SelectItem value="2">+2 habitaciones</SelectItem>
+              <SelectItem value="3">+3 habitaciones</SelectItem>
+              <SelectItem value="4">+4 habitaciones</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Baños */}
+        <div>
+          <h4 className="font-bold mb-2">Baños</h4>
+          <Select
+            value={localFilters.banos}
+            onValueChange={(value) =>
+              setLocalFilters((prev) => ({ ...prev, banos: value }))
+            }
+          >
+            <SelectTrigger className="w-full rounded-xl border-gray-300">
+              <SelectValue placeholder="Selecciona baños" />
+            </SelectTrigger>
+            <SelectContent className="bg-white rounded-xl border-0 shadow-lg">
+              <SelectItem value="any">Cualquier número de baños</SelectItem>
+              <SelectItem value="1">+1 baño</SelectItem>
+              <SelectItem value="2">+2 baños</SelectItem>
+              <SelectItem value="3">+3 baños</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Habitaciones */}

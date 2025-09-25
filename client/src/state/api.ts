@@ -7,25 +7,26 @@ import {
   Alojamiento,
 } from "@/types/prismaTypes";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
 import { FiltersState } from ".";
 
 export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
-    prepareHeaders: async (headers) => {
-      try {
-        const session = await fetchAuthSession();
-        const { idToken } = session.tokens ?? {};
-        console.log("Session:", session);
-        console.log("ID Token:", idToken);
-        if (idToken) {
-          headers.set("Authorization", `Bearer ${idToken}`);
-        }
-      } catch (error) {
-        console.error("Error obteniendo la sesión:", error);
+    prepareHeaders: (headers) => {
+      const token = localStorage.getItem("token");
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`);
       }
       return headers;
+    },
+    errorHandler: (error, query, extraOptions, baseQuery) => {
+      // Solo manejar errores 401 si no estamos en páginas de auth
+      if (error.status === 401 && !window.location.pathname.match(/^\/(login|registro|recuperar-contrasena)$/)) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/login";
+      }
+      return { error };
     },
   }),
   reducerPath: "api",
@@ -35,6 +36,8 @@ export const api = createApi({
     "Alojamientos",
     "Mensajes",
     "Solicitudes",
+    "AdminConversation",
+    "AdminConversations",
   ],
   // Dentro de tu createApi
   endpoints: (build) => ({
@@ -48,6 +51,7 @@ export const api = createApi({
         method: "POST",
         body,
       }),
+      invalidatesTags: ["Mensajes"],
       async onQueryStarted(_, { queryFulfilled }) {
         await withToast(queryFulfilled, {
           success: "Mensaje enviado con éxito",
@@ -79,6 +83,43 @@ export const api = createApi({
       },
     }),
 
+    // Conversaciones admin-propietario
+    getAdminConversation: build.query<Conversacion | null, { propietarioId: number }>({
+      query: ({ propietarioId }) => `/chat/admin-conversation/${propietarioId}`,
+      providesTags: (result, error, { propietarioId }) => [
+        { type: "AdminConversation", id: propietarioId },
+        "Mensajes"
+      ],
+    }),
+
+    initAdminConversation: build.mutation<
+      { mensaje: Mensaje; conversacion: number },
+      { propietarioId: number; mensaje: string }
+    >({
+      query: ({ propietarioId, mensaje }) => ({
+        url: `/chat/admin-conversation`,
+        method: "POST",
+        body: { propietarioId, mensaje },
+      }),
+      invalidatesTags: (result, error, { propietarioId }) => [
+        { type: "AdminConversation", id: propietarioId },
+        "Mensajes",
+        "AdminConversations"
+      ],
+      async onQueryStarted(_, { queryFulfilled }) {
+        await withToast(queryFulfilled, {
+          success: "Mensaje enviado al administrador",
+          error: "Error al enviar el mensaje",
+        });
+      },
+    }),
+
+    // Obtener todas las conversaciones admin para administradores
+    getAdminConversations: build.query<Conversacion[], void>({
+      query: () => `/chat/admin-conversations`,
+      providesTags: ["AdminConversations", "Mensajes"],
+    }),
+
 
     marcarComoLeido: build.mutation<
       { message: string },
@@ -101,72 +142,159 @@ export const api = createApi({
     }),
 
     getAuthUser: build.query<User, void>({
-      queryFn: async (_, _queryApi, _extraoptions, fetchWithBQ) => {
+      query: () => "auth/me",
+      transformResponse: (response: { user: Estudiante | Propietario | Admin }) => ({
+        userInfo: response.user,
+        userRole: response.user.tipo,
+      }),
+    }),
+
+    login: build.mutation<{ token: string; user: User }, { email: string; password: string }>({
+      query: (credentials) => ({
+        url: "auth/login",
+        method: "POST",
+        body: credentials,
+      }),
+      transformResponse: (response: { token: string; user: Estudiante | Propietario | Admin }) => ({
+        token: response.token,
+        user: {
+          userInfo: response.user,
+          userRole: response.user.tipo,
+        },
+      }),
+      async onQueryStarted(_, { queryFulfilled }) {
         try {
-          const session = await fetchAuthSession();
-          const user = await getCurrentUser();
-
-          if (!user?.userId) {
-            return { error: "No se ha podido obtener el usuario de Cognito" };
-          }
-
-          const endpoints = [
-            `/admin/${user.userId}`,
-            `/propietaris/${user.userId}`,
-            `/estudiante/${user.userId}`,
-          ];
-
-          for (const endpoint of endpoints) {
-            const response = await fetchWithBQ(endpoint);
-            if (!response.error) {
-              const userInfo = response.data as Estudiante | Propietario | Admin;
-              return {
-                data: {
-                  cognitoInfo: user,
-                  userInfo,
-                  userRole: userInfo.tipo,
-                },
-              };
-            }
-          }
-
-          // Usuario aún no registrado en la BD
-          return { error: "Usuario no registrado en el sistema" };
-
-        } catch (error: any) {
-          return { error: error.message || "Error al obtener la info del usuario" };
+          const { data } = await queryFulfilled;
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("user", JSON.stringify(data.user));
+        } catch (error) {
+          console.error("Login error:", error);
         }
+      },
+    }),
+
+    register: build.mutation<{ token: string; user: User }, { nombre: string; email: string; password: string; tipo: string }>({
+      query: (userData) => ({
+        url: "auth/register",
+        method: "POST",
+        body: userData,
+      }),
+      transformResponse: (response: { token: string; user: Estudiante | Propietario | Admin }) => ({
+        token: response.token,
+        user: {
+          userInfo: response.user,
+          userRole: response.user.tipo,
+        },
+      }),
+      async onQueryStarted(_, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("user", JSON.stringify(data.user));
+        } catch (error) {
+          console.error("Register error:", error);
+        }
+      },
+    }),
+
+    forgotPassword: build.mutation<{ message: string; resetToken?: string }, { email: string }>({
+      query: (body) => ({
+        url: "auth/forgot-password",
+        method: "POST",
+        body,
+      }),
+    }),
+
+    resetPassword: build.mutation<{ message: string }, { token: string; newPassword: string }>({
+      query: (body) => ({
+        url: "auth/reset-password",
+        method: "POST",
+        body,
+      }),
+    }),
+
+    verifyEmail: build.mutation<{ message: string }, { token: string }>({
+      query: (body) => ({
+        url: "auth/verify-email",
+        method: "POST",
+        body,
+      }),
+      async onQueryStarted(_, { queryFulfilled }) {
+        await withToast(queryFulfilled, {
+          success: "Email verificado exitosamente",
+          error: "Error al verificar el email",
+        });
+      },
+    }),
+
+    resendVerificationEmail: build.mutation<{ message: string; verificationToken?: string }, { email: string }>({
+      query: (body) => ({
+        url: "auth/resend-verification",
+        method: "POST",
+        body,
+      }),
+      async onQueryStarted(_, { queryFulfilled }) {
+        await withToast(queryFulfilled, {
+          success: "Email de verificación enviado",
+          error: "Error al enviar email de verificación",
+        });
       },
     }),
 
     // property related endpoints
     getProperties: build.query<
-      Alojamiento[],
-      (Partial<FiltersState> & { favoriteIds?: number[] }) | void
+      {
+        alojamientos: Alojamiento[];
+        pagination: {
+          page: number;
+          limit: number;
+          total: number;
+          totalPages: number;
+          hasNext: boolean;
+          hasPrev: boolean;
+        };
+        filters: {
+          applied: boolean;
+          count: number;
+        };
+      },
+      (Partial<FiltersState> & { 
+        favoriteIds?: number[]; 
+        page?: number; 
+        limit?: number;
+        sortBy?: string;
+      }) | void
     >({
       query: (filters = {}) => {
         const params = cleanParams({
           location: filters?.location,
-          precioMin: filters?.rangoPrecio?.[0],
-          precioMax: filters?.rangoPrecio?.[1],
-          habitaciones: filters?.habitaciones,
-          banos: filters?.banos,
-          tipoAlojamiento: filters?.tipoAlojamiento,
-          superficieMin: filters?.superficie?.[0],
-          SuperficieMax: filters?.superficie?.[1],
-          amenities: filters?.amenities?.join(","),
-          includedExpenses: filters?.includedExpenses?.join(","),
-          latitude: filters?.coordinates?.[1],
-          longitude: filters?.coordinates?.[0],
-          estado: "Aprobado",
+          priceMin: filters?.rangoPrecio?.[0],
+          priceMax: filters?.rangoPrecio?.[1],
+          beds: filters?.habitaciones,
+          baths: filters?.banos,
+          propertyType: filters?.tipoAlojamiento,
+          squareFeetMin: filters?.superficie?.[0],
+          squareFeetMax: filters?.superficie?.[1],
+          provincia: filters?.provincia,
+          page: filters?.page || 1,
+          limit: filters?.limit || 24,
+          sortBy: filters?.sortBy || "featured",
+          // Solo incluir coordenadas si no son las coordenadas por defecto
+          ...(filters?.coordinates && 
+              filters.coordinates[0] !== 0 && 
+              filters.coordinates[1] !== 0 &&
+              !(filters.coordinates[0] === -0.4280276 && filters.coordinates[1] === 39.547361) && {
+            latitude: filters.coordinates[1],
+            longitude: filters.coordinates[0],
+          }),
         });
 
         return { url: "alojamientos", params };
       },
       providesTags: (result) =>
-        result
+        result?.alojamientos
           ? [
-              ...result.map(({ id }) => ({ type: "Alojamientos" as const, id })),
+              ...result.alojamientos.map(({ id }) => ({ type: "Alojamientos" as const, id })),
               { type: "Alojamientos", id: "LIST" },
             ]
           : [{ type: "Alojamientos", id: "LIST" }],
@@ -177,7 +305,7 @@ export const api = createApi({
       },
     }),
 
-    getProperty: build.query<Alojamiento, number>({
+    getProperty: build.query<Alojamiento, string | number>({
       query: (id) => `alojamientos/${id}`,
       providesTags: (result, error, id) => [{ type: "Alojamientos", id }],
       async onQueryStarted(_, { queryFulfilled }) {
@@ -187,9 +315,30 @@ export const api = createApi({
       },
     }),
 
+    getPropertyBySlug: build.query<Alojamiento, string>({
+      query: (slug) => `alojamientos/slug/${slug}`,
+      providesTags: (result, error, slug) => [{ type: "Alojamientos", id: result?.id || slug }],
+      async onQueryStarted(_, { queryFulfilled }) {
+        await withToast(queryFulfilled, {
+          error: "Error al cargar los detalles del alojamiento.",
+        });
+      },
+    }),
+
+    // Admin puede obtener alojamientos en cualquier estado
+    getAdminProperty: build.query<Alojamiento, number>({
+      query: (id) => `admin/alojamientos/${id}`,
+      providesTags: (result, error, id) => [{ type: "Alojamientos", id }],
+      async onQueryStarted(_, { queryFulfilled }) {
+        await withToast(queryFulfilled, {
+          error: "Error al cargar los detalles del alojamiento.",
+        });
+      },
+    }),
+
     // tenant related endpoints
-    getTenant: build.query<Estudiante, string>({
-      query: (cognitoId) => `estudiante/${cognitoId}`,
+    getTenant: build.query<Estudiante, number>({
+      query: (userId) => `estudiante/${userId}`,
       providesTags: (result) => [{ type: "Estudiantes", id: result?.id }],
       async onQueryStarted(_, { queryFulfilled }) {
         await withToast(queryFulfilled, {
@@ -198,8 +347,8 @@ export const api = createApi({
       },
     }),
 
-    getCurrentResidences: build.query<Alojamiento[], string>({
-      query: (cognitoId) => `estudiante/${cognitoId}/current-residences`,
+    getCurrentResidences: build.query<Alojamiento[], number>({
+      query: (userId) => `estudiante/${userId}/current-residences`,
       providesTags: (result) =>
         result
           ? [
@@ -252,12 +401,33 @@ export const api = createApi({
       },
     }),
 
+    republishProperty: build.mutation<
+      { message: string; alojamiento: any },
+      { id: number; userId: number }
+    >({
+      query: ({ id, userId }) => ({
+        url: `alojamientos/${id}/republish`,
+        method: "PATCH",
+        body: { userId },
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "Alojamientos", id: "LIST" },
+        { type: "Alojamientos", id },
+      ],
+      async onQueryStarted(_, { queryFulfilled }) {
+        await withToast(queryFulfilled, {
+          success: "Alojamiento republicado correctamente. Será revisado por el administrador.",
+          error: "Error al republicar el alojamiento",
+        });
+      },
+    }),
+
     updateStudentSettings: build.mutation<
       Estudiante,
-      { cognitoId: string } & Partial<Estudiante>
+      { userId: number } & Partial<Estudiante>
     >({
-      query: ({ cognitoId, ...updatedStudent }) => ({
-        url: `estudiante/${cognitoId}`,
+      query: ({ userId, ...updatedStudent }) => ({
+        url: `estudiante/${userId}`,
         method: "PUT",
         body: updatedStudent,
       }),
@@ -272,10 +442,10 @@ export const api = createApi({
 
     addFavoriteProperty: build.mutation<
       Estudiante,
-      { cognitoId: string; propertyId: number }
+      { userId: number; propertyId: number }
     >({
-      query: ({ cognitoId, propertyId }) => ({
-        url: `estudiante/${cognitoId}/favoritos/${propertyId}`,
+      query: ({ userId, propertyId }) => ({
+        url: `estudiante/${userId}/favoritos/${propertyId}`,
         method: "POST",
       }),
       invalidatesTags: (result) => [
@@ -292,10 +462,10 @@ export const api = createApi({
 
     removeFavoriteProperty: build.mutation<
       Estudiante,
-      { cognitoId: string; propertyId: number }
+      { userId: number; propertyId: number }
     >({
-      query: ({ cognitoId, propertyId }) => ({
-        url: `estudiante/${cognitoId}/favoritos/${propertyId}`,
+      query: ({ userId, propertyId }) => ({
+        url: `estudiante/${userId}/favoritos/${propertyId}`,
         method: "DELETE",
       }),
       invalidatesTags: (result) => [
@@ -311,8 +481,8 @@ export const api = createApi({
     }),
 
     // manager related endpoints
-    getManagerProperties: build.query<Alojamiento[], string>({
-      query: (cognitoId) => `propietario/${cognitoId}/alojamientos`,
+    getManagerProperties: build.query<Alojamiento[], number>({
+      query: (userId) => `propietario/${userId}/alojamientos`,
       providesTags: (result) =>
         result
           ? [
@@ -329,10 +499,10 @@ export const api = createApi({
 
     updateManagerSettings: build.mutation<
       Propietario,
-      { cognitoId: string } & Partial<Propietario>
+      { userId: number } & Partial<Propietario>
     >({
-      query: ({ cognitoId, ...updatedManager }) => ({
-        url: `propietario/${cognitoId}`,
+      query: ({ userId, ...updatedManager }) => ({
+        url: `propietario/${userId}`,
         method: "PUT",
         body: updatedManager,
       }),
@@ -413,19 +583,197 @@ export const api = createApi({
         });
       },
     }),
+    deleteApprovedProperty: build.mutation<{ message: string }, number>({
+      query: (id) => ({
+        url: `admin/alojamientos/${id}/eliminar`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, id) => [
+        { type: "Alojamientos", id },
+        { type: "Alojamientos", id: "APPROVED" },
+        { type: "Alojamientos", id: "LIST" },
+      ],
+      async onQueryStarted(_, { queryFulfilled }) {
+        await withToast(queryFulfilled, {
+          success: "Alojamiento eliminado correctamente.",
+          error: "Error al eliminar alojamiento.",
+        });
+      },
+    }),
     // admin related endpoints
-    getAdminProperties: build.query<Alojamiento[], void>({
-      query: () => `admin/alojamientos`,
+    getAdminPropietarios: build.query<
+      {
+        propietarios: Array<{
+          id: number;
+          nombre: string;
+          email: string;
+          telefono: string | null;
+          createdAt: string;
+          isEmailVerified: boolean;
+          isSuspended: boolean;
+          _count: {
+            alojamientos: number;
+            conversacionesComoPropietario: number;
+          };
+        }>;
+        pagination: {
+          currentPage: number;
+          totalPages: number;
+          totalCount: number;
+          limit: number;
+        };
+      },
+      {
+        search?: string;
+        sortBy?: 'createdAt' | 'nombre' | 'email';
+        sortOrder?: 'asc' | 'desc';
+        page?: number;
+        limit?: number;
+      } | void
+    >({
+      query: (params = {}) => {
+        const searchParams = new URLSearchParams();
+        
+        if (params.search) searchParams.set('search', params.search);
+        if (params.sortBy) searchParams.set('sortBy', params.sortBy);
+        if (params.sortOrder) searchParams.set('sortOrder', params.sortOrder);
+        if (params.page) searchParams.set('page', params.page.toString());
+        if (params.limit) searchParams.set('limit', params.limit.toString());
+        
+        return `admin/propietarios?${searchParams.toString()}`;
+      },
+      providesTags: (result) =>
+        result?.propietarios
+          ? [
+              ...result.propietarios.map(({ id }) => ({ type: "Propietarios" as const, id })),
+              { type: "Propietarios", id: "LIST" },
+            ]
+          : [{ type: "Propietarios", id: "LIST" }],
+      async onQueryStarted(_, { queryFulfilled }) {
+        await withToast(queryFulfilled, {
+          error: "Error al cargar la lista de propietarios.",
+        });
+      },
+    }),
+    getAdminPendingProperties: build.query<Alojamiento[], void>({
+      query: () => `admin/alojamientos/pendientes`,
       providesTags: (result) =>
         result
           ? [
               ...result.map(({ id }) => ({ type: "Alojamientos" as const, id })),
-              { type: "Alojamientos", id: "LIST" },
+              { type: "Alojamientos", id: "PENDING" },
             ]
-          : [{ type: "Alojamientos", id: "LIST" }],
+          : [{ type: "Alojamientos", id: "PENDING" }],
       async onQueryStarted(_, { queryFulfilled }) {
         await withToast(queryFulfilled, {
-          error: "Error al cargar los alojamientos del administrador.",
+          error: "Error al cargar los alojamientos pendientes.",
+        });
+      },
+    }),
+    getAdminApprovedProperties: build.query<
+      {
+        properties: Alojamiento[];
+        pagination: {
+          currentPage: number;
+          totalPages: number;
+          totalCount: number;
+          limit: number;
+        };
+      },
+      {
+        search?: string;
+        sortBy?: 'postedDate' | 'nombre' | 'precio';
+        sortOrder?: 'asc' | 'desc';
+        propietario?: string;
+        page?: number;
+        limit?: number;
+      } | void
+    >({
+      query: (params = {}) => {
+        const searchParams = new URLSearchParams();
+        
+        if (params.search) searchParams.set('search', params.search);
+        if (params.sortBy) searchParams.set('sortBy', params.sortBy);
+        if (params.sortOrder) searchParams.set('sortOrder', params.sortOrder);
+        if (params.propietario) searchParams.set('propietario', params.propietario);
+        if (params.page) searchParams.set('page', params.page.toString());
+        if (params.limit) searchParams.set('limit', params.limit.toString());
+        
+        return `admin/alojamientos/aprobados?${searchParams.toString()}`;
+      },
+      providesTags: (result) =>
+        result?.properties
+          ? [
+              ...result.properties.map(({ id }) => ({ type: "Alojamientos" as const, id })),
+              { type: "Alojamientos", id: "APPROVED" },
+            ]
+          : [{ type: "Alojamientos", id: "APPROVED" }],
+      async onQueryStarted(_, { queryFulfilled }) {
+        await withToast(queryFulfilled, {
+          error: "Error al cargar los alojamientos aprobados.",
+        });
+      },
+    }),
+
+
+    // Admin propietarios management endpoints
+    suspendPropietario: build.mutation<{ success: boolean; message: string }, { propietarioId: number; motivo: string }>({
+      query: ({ propietarioId, motivo }) => ({
+        url: `admin/propietarios/${propietarioId}/suspender`,
+        method: "PUT",
+        body: { motivo },
+      }),
+      invalidatesTags: ["Propietarios"],
+      async onQueryStarted(_, { queryFulfilled }) {
+        await withToast(queryFulfilled, {
+          success: "Propietario suspendido correctamente",
+          error: "Error al suspender el propietario",
+        });
+      },
+    }),
+
+    reactivarPropietario: build.mutation<{ success: boolean; message: string }, number>({
+      query: (propietarioId) => ({
+        url: `admin/propietarios/${propietarioId}/reactivar`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["Propietarios"],
+      async onQueryStarted(_, { queryFulfilled }) {
+        await withToast(queryFulfilled, {
+          success: "Propietario reactivado correctamente",
+          error: "Error al reactivar el propietario",
+        });
+      },
+    }),
+
+    eliminarPropietario: build.mutation<{ success: boolean; message: string }, number>({
+      query: (propietarioId) => ({
+        url: `admin/propietarios/${propietarioId}/eliminar`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Propietarios"],
+      async onQueryStarted(_, { queryFulfilled }) {
+        await withToast(queryFulfilled, {
+          success: "Propietario eliminado correctamente",
+          error: "Error al eliminar el propietario",
+        });
+      },
+    }),
+
+    enviarMensajePropietario: build.mutation<
+      { success: boolean; conversacion: any; mensaje: any },
+      { propietarioId: number; mensaje: string; alojamientoId?: number }
+    >({
+      query: ({ propietarioId, mensaje, alojamientoId }) => ({
+        url: `admin/propietarios/${propietarioId}/mensaje`,
+        method: "POST",
+        body: { mensaje, alojamientoId },
+      }),
+      invalidatesTags: ["Conversaciones"],
+      async onQueryStarted(_, { queryFulfilled }) {
+        await withToast(queryFulfilled, {
+          success: "Mensaje enviado correctamente",
+          error: "Error al enviar el mensaje",
         });
       },
     }),
@@ -435,6 +783,12 @@ export const api = createApi({
 
 export const {
   useGetAuthUserQuery,
+  useLoginMutation,
+  useRegisterMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation,
+  useVerifyEmailMutation,
+  useResendVerificationEmailMutation,
   useUpdateStudentSettingsMutation,
   useUpdatePropertyMutation,
   useMarcarComoLeidoMutation,
@@ -442,6 +796,8 @@ export const {
   useUpdateManagerSettingsMutation,
   useGetPropertiesQuery,
   useGetPropertyQuery,
+  useGetPropertyBySlugQuery,
+  useGetAdminPropertyQuery,
   useGetCurrentResidencesQuery,
   useGetManagerPropertiesQuery,
   useCreatePropertyMutation,
@@ -454,6 +810,17 @@ export const {
   useGetAlojamientosPendientesQuery,
   useApproveAlojamientoMutation,
   useRejectAlojamientoMutation,
-  useGetAdminPropertiesQuery,
-  useCreateOrGetConversacionMutation
+  useGetAdminPendingPropertiesQuery,
+  useGetAdminApprovedPropertiesQuery,
+  useGetAdminPropietariosQuery,
+  useDeleteApprovedPropertyMutation,
+  useCreateOrGetConversacionMutation,
+  useSuspendPropietarioMutation,
+  useReactivarPropietarioMutation,
+  useEliminarPropietarioMutation,
+  useEnviarMensajePropietarioMutation,
+  useGetAdminConversationQuery,
+  useInitAdminConversationMutation,
+  useGetAdminConversationsQuery,
+  useRepublishPropertyMutation
 } = api;

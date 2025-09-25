@@ -3,17 +3,24 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  console.error('❌ JWT_SECRET no está configurado en las variables de entorno');
+  process.exit(1);
+}
 
 interface DecodedToken extends JwtPayload {
-  sub: string;
+  userId: number;
   email: string;
+  tipo: string;
 }
 
 declare global {
   namespace Express {
     interface Request {
       user?: {
-        cognitoId: string;
+        userId: number;
         email: string;
         role: string;
       };
@@ -32,18 +39,16 @@ export const authMiddleware = (allowedRoles: string[]) => {
     }
 
     try {
-      const decoded = jwt.decode(token) as DecodedToken;
-      const email = decoded?.email;
-      const cognitoId = decoded?.sub;
+      const decoded = jwt.verify(token, JWT_SECRET) as DecodedToken;
 
-      if (!email || !cognitoId) {
+      if (!decoded.userId || !decoded.email || !decoded.tipo) {
         res.status(400).json({ message: "Token inválido o incompleto" });
         return;
       }
 
       const user = await prisma.usuario.findUnique({
-        where: { cognitoId },
-        select: { tipo: true },
+        where: { id: decoded.userId },
+        select: { tipo: true, email: true },
       });
 
       if (!user) {
@@ -53,7 +58,7 @@ export const authMiddleware = (allowedRoles: string[]) => {
 
       const role = user.tipo.toLowerCase();
 
-      req.user = { cognitoId, email, role };
+      req.user = { userId: decoded.userId, email: decoded.email, role };
 
       const hasAccess = allowedRoles.includes(role);
       if (!hasAccess) {
@@ -64,7 +69,7 @@ export const authMiddleware = (allowedRoles: string[]) => {
       next();
     } catch (err) {
       console.error("Error al procesar el token:", err);
-      res.status(400).json({ message: "Token inválido" });
+      res.status(401).json({ message: "Token inválido" });
     }
   };
 };
@@ -83,22 +88,23 @@ export const extractUserFromToken = (
   }
 
   try {
-    const decoded = jwt.decode(token) as DecodedToken;
+    const decoded = jwt.verify(token, JWT_SECRET) as DecodedToken;
 
-    if (!decoded?.sub || !decoded?.email) {
+    if (!decoded.userId || !decoded.email) {
       res.status(400).json({ message: "Token inválido o incompleto" });
       return;
     }
 
     req.user = {
-      cognitoId: decoded.sub,
+      userId: decoded.userId,
       email: decoded.email,
-      role: "pendiente",
+      role: decoded.tipo.toLowerCase(),
     };
 
     next();
   } catch (err) {
-    res.status(400).json({ message: "Error al decodificar token" });
+    console.error("Error al decodificar token:", err);
+    res.status(401).json({ message: "Error al decodificar token" });
     return;
   }
 };

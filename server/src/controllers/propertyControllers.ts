@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
-import { PrismaClient, Prisma, Ubicacion } from "@prisma/client";
-import axios from "axios";
+import { PrismaClient, Prisma } from "@prisma/client";
 import { getMulterForAlojamiento } from "../multerConfig";
 import path from "path";
 import fs from "fs";
+import { generateUniqueSlug } from "../utils/slugGenerator";
 
 
 const prisma = new PrismaClient();
@@ -26,6 +26,9 @@ export const updateProperty = (req: Request, res: Response): void => {
         provincia,
         pais,
         codigoPostal,
+        portal,
+        piso,
+        puerta,
         managerUsuarioId,
         estado,
         alojamientoId: _omitAlojamientoId,
@@ -36,7 +39,7 @@ export const updateProperty = (req: Request, res: Response): void => {
 
       const property = await prisma.alojamiento.findUnique({
         where: { id: alojamientoId },
-        include: { ubicacion: true, propietario: true },
+        include: { propietario: true },
       });
 
       if (!property) {
@@ -46,48 +49,32 @@ export const updateProperty = (req: Request, res: Response): void => {
       // 1. Convertir fotos existentes (del frontend)
       const existing = JSON.parse(req.body.existingPhotos ?? "[]");
 
-
       // 2. Fotos nuevas subidas ahora
       const newPhotos = files?.map(file => `/alojamientos/${alojamientoId}/${file.filename}`) ?? [];
 
       // 3. Combinar todo
       const photoUrls = [...existing, ...newPhotos];
 
-      // 4. Actualizar ubicación
-      const geo = await axios.get("https://nominatim.openstreetmap.org/search?" + new URLSearchParams({
-        street: direccion,
-        city: ciudad,
-        country: "España",
-        postalcode: codigoPostal,
-        format: "json",
-        limit: "1",
-      }).toString(), {
-        headers: { "User-Agent": "UCHCEU (desarrolloweb@uchceu.es)" }
-      });
+      // 4. Mantener el slug original (no regenerar aunque cambie el nombre)
+      let newSlug = property.slug;
 
-      const [lon, lat] = geo.data[0] ? [parseFloat(geo.data[0].lon), parseFloat(geo.data[0].lat)] : [0, 0];
-
-      await prisma.ubicacion.update({
-        where: { id: property.ubicacionId },
-        data: {
-          direccion,
-          ciudad,
-          provincia,
-          pais: 'España',
-          codigoPostal,
-          latitud: lat,
-          longitud: lon,
-        },
-      });
-
-
-      // 5. Actualizar propiedad
+      // 5. Actualizar propiedad con nuevos campos de dirección
       const updatedProperty = await prisma.alojamiento.update({
         where: { id: alojamientoId },
         data: {
           ...propertyData,
+          slug: newSlug,
           photoUrls,
           managerUsuarioId: Number(managerUsuarioId),
+          // Address fields
+          direccion,
+          ciudad,
+          provincia,
+          pais: pais || "España",
+          codigoPostal,
+          portal: portal || null,
+          piso: piso || null,
+          puerta: puerta || null,
 
           esDestacado:
             typeof propertyData.esDestacado !== "undefined"
@@ -129,7 +116,7 @@ export const updateProperty = (req: Request, res: Response): void => {
           ...(estado && { estado }),
           ...(motivoRechazo && { motivoRechazo }),
         },
-        include: { ubicacion: true, propietario: true },
+        include: { propietario: true },
       });
 
       // 6. Borrar imágenes eliminadas por el usuario
@@ -143,6 +130,15 @@ export const updateProperty = (req: Request, res: Response): void => {
             fs.unlinkSync(path.join(alojamientoPath, file));
           }
         }
+      }
+
+      // 7. Si la propiedad estaba rechazada y se actualizó, cambiar estado a Pendiente
+      if (property.estado === "Rechazado") {
+        // Cambiar el estado a Pendiente ya que se ha editado
+        await prisma.alojamiento.update({
+          where: { id: alojamientoId },
+          data: { estado: "Pendiente", motivoRechazo: null }
+        });
       }
 
       res.json(updatedProperty);
@@ -191,9 +187,20 @@ export const getProperties = async (req: Request, res: Response): Promise<void> 
       squareFeetMax,
       latitude,
       longitude,
+      provincia,
+      page = "1",
+      limit = "24",
+      sortBy = "featured"
     } = req.query;
 
-    const filters: any = {};
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
+    const skip = (pageNum - 1) * limitNum;
+
+    const filters: any = {
+      // Solo mostrar alojamientos aprobados (excluir suspendidos, pendientes y rechazados)
+      estado: "Aprobado"
+    };
 
     if (priceMin) filters.precio = { gte: Number(priceMin) };
     if (priceMax) filters.precio = { ...filters.precio, lte: Number(priceMax) };
@@ -203,44 +210,80 @@ export const getProperties = async (req: Request, res: Response): Promise<void> 
     if (squareFeetMax) filters.superficie = { ...filters.superficie, lte: Number(squareFeetMax) };
     if (propertyType && propertyType !== "any") filters.tipoAlojamiento = propertyType;
 
+    // Filtro por provincia
+    if (provincia && provincia !== "any") {
+      filters.provincia = provincia;
+    }
+
+    // Orden de resultados optimizado para 150 alojamientos
+    let orderBy: any[] = [];
+    switch (sortBy) {
+      case "featured":
+        orderBy = [
+          { esDestacado: 'desc' },
+          { postedDate: 'desc' }
+        ];
+        break;
+      case "newest":
+        orderBy = [{ postedDate: 'desc' }];
+        break;
+      case "price_asc":
+        orderBy = [{ precio: 'asc' }];
+        break;
+      case "price_desc":
+        orderBy = [{ precio: 'desc' }];
+        break;
+      case "popularity":
+        // Podrías agregar un campo de popularidad basado en vistas/favoritos
+        orderBy = [
+          { esDestacado: 'desc' },
+          { postedDate: 'desc' }
+        ];
+        break;
+      default:
+        orderBy = [
+          { esDestacado: 'desc' },
+          { postedDate: 'desc' }
+        ];
+    }
+
+    // Obtener total para paginación (más eficiente)
+    const total = await prisma.alojamiento.count({
+      where: filters
+    });
+
     const alojamientos = await prisma.alojamiento.findMany({
       where: filters,
       include: {
-        ubicacion: true,
-        propietario: true,
+        propietario: {
+          select: {
+            id: true,
+            nombre: true,
+            email: true,
+            telefono: true,
+          },
+        },
       },
+      orderBy,
+      skip,
+      take: limitNum
     });
 
-    const withCoords = alojamientos
-      .map((a) => {
-        if (latitude && longitude) {
-          const lat = parseFloat(latitude as string);
-          const lng = parseFloat(longitude as string);
-          const delta = 0.1; // ~11 km
-
-          const dentro =
-            Math.abs(a.ubicacion.latitud - lat) <= delta &&
-            Math.abs(a.ubicacion.longitud - lng) <= delta;
-
-          if (!dentro) return null;
-        }
-
-        const { latitud, longitud, ...rest } = a.ubicacion;
-
-        return {
-          ...a,
-          ubicacion: {
-            ...rest,
-            coordinates: {
-              latitude: latitud,
-              longitude: longitud,
-            },
-          },
-        };
-      })
-      .filter(Boolean);
-
-    res.json(withCoords);
+    res.json({
+      alojamientos: alojamientos,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        totalPages: Math.ceil(total / limitNum),
+        hasNext: pageNum * limitNum < total,
+        hasPrev: pageNum > 1
+      },
+      filters: {
+        applied: Object.keys(filters).filter(key => key !== 'estado').length > 0,
+        count: total
+      }
+    });
   } catch (error: any) {
     res.status(500).json({
       message: `Error al recuperar los alojamientos: ${error.message}`,
@@ -249,13 +292,55 @@ export const getProperties = async (req: Request, res: Response): Promise<void> 
 };
 export const getProperty = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { id } = req.params;
+    const { id, slug } = req.params;
+    const identifier = slug || id;
 
+    // Validación de entrada
+    if (!identifier || identifier.trim() === '') {
+      res.status(400).json({ message: "ID del alojamiento es requerido" });
+      return;
+    }
+
+    // Validar que el ID/slug no sea demasiado largo
+    if (identifier.length > 150) {
+      res.status(400).json({ message: "ID del alojamiento demasiado largo" });
+      return;
+    }
+
+    // Determinar si el parámetro es un número (ID) o string (slug)
+    const isNumeric = /^\d+$/.test(identifier);
+    const isValidSlug = /^[a-z0-9-]+$/.test(identifier);
+
+    if (!isNumeric && !isValidSlug) {
+      res.status(400).json({ message: "Formato de ID/slug no válido" });
+      return;
+    }
+    
     const property = await prisma.alojamiento.findUnique({
-      where: { id: Number(id) },
+      where: isNumeric 
+        ? { 
+            id: Number(identifier),
+            // Solo mostrar alojamientos aprobados (excluir suspendidos, pendientes y rechazados)
+            estado: "Aprobado"
+          }
+        : {
+            slug: identifier,
+            // Solo mostrar alojamientos aprobados (excluir suspendidos, pendientes y rechazados)
+            estado: "Aprobado"
+          },
       include: {
-        ubicacion: true,
-        propietario: true,
+        propietario: {
+          select: {
+            id: true,
+            nombre: true,
+            email: true,
+            telefono: true,
+            tipo: true,
+            isEmailVerified: true,
+            createdAt: true
+            // No incluir password ni otros campos sensibles
+          }
+        },
       },
     });
 
@@ -264,22 +349,10 @@ export const getProperty = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    const { latitud, longitud, ...restUbicacion } = property.ubicacion;
-
-    const propertyWithCoordinates = {
-      ...property,
-      ubicacion: {
-        ...restUbicacion,
-        latitud,
-        longitud,
-      },
-    };
-
-    res.json(propertyWithCoordinates);
+    res.json(property);
   } catch (err: any) {
-    res
-      .status(500)
-      .json({ message: `Error al recuperar el alojamiento: ${err.message}` });
+    console.error('Error al recuperar alojamiento:', err);
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
 
@@ -296,35 +369,54 @@ export const createProperty = (req: Request, res: Response): void => {
     const tempDir = files[0]?.destination ?? "";
 
     try {
-      const { direccion, ciudad, provincia, codigoPostal, managerUsuarioId, ...propertyData } = req.body;
+      const { direccion, ciudad, provincia, codigoPostal, pais, portal, piso, puerta, managerUsuarioId, ...propertyData } = req.body;
 
-      const geo = await axios.get("https://nominatim.openstreetmap.org/search?" + new URLSearchParams({
-        street: direccion,
-        city: ciudad,
-        country: "España",
-        postalcode: codigoPostal,
-        format: "json",
-        limit: "1",
-      }).toString(), { headers: { "User-Agent": "UCHCEU (desarrolloweb@uchceu.es)" } });
-
-      const [lon, lat] = geo.data[0] ? [parseFloat(geo.data[0].lon), parseFloat(geo.data[0].lat)] : [0, 0];
-
-      const ubicacion = await prisma.ubicacion.create({
-        data: {
-          direccion,
-          ciudad,
-          provincia,
-          pais: "España",
-          codigoPostal,
-          latitud: lat,
-          longitud: lon,
-        },
+      // Verificar que el propietario no esté suspendido
+      const propietario = await prisma.usuario.findUnique({
+        where: { id: parseInt(managerUsuarioId) },
+        select: { isSuspended: true, tipo: true },
       });
 
+      if (!propietario) {
+        // Limpiar archivos temporales
+        if (tempDir) {
+          fs.rmSync(tempDir, { recursive: true, force: true });
+        }
+        return res.status(404).json({ message: "Propietario no encontrado" });
+      }
+
+      if (propietario.isSuspended) {
+        // Limpiar archivos temporales
+        if (tempDir) {
+          fs.rmSync(tempDir, { recursive: true, force: true });
+        }
+        return res.status(403).json({ message: "Tu cuenta está suspendida y no puedes subir nuevos alojamientos" });
+      }
+
+      // Generar slug único basado en el nombre
+      const slug = await generateUniqueSlug(
+        propertyData.nombre,
+        async (slug: string) => {
+          const existing = await prisma.alojamiento.findUnique({
+            where: { slug }
+          });
+          return !!existing;
+        }
+      );
 
       const alojamiento = await prisma.alojamiento.create({
         data: {
           ...mapPropertyBooleans(propertyData),
+          slug,
+          // Address fields
+          direccion,
+          ciudad,
+          provincia,
+          pais: pais || "España",
+          codigoPostal,
+          portal: portal || null,
+          piso: piso || null,
+          puerta: puerta || null,
           precio: Number(propertyData.precio),
           habitaciones: Number(propertyData.habitaciones),
           banos: Number(propertyData.banos),
@@ -335,9 +427,6 @@ export const createProperty = (req: Request, res: Response): void => {
           estado: "Pendiente",
           propietario: {
             connect: { id: parseInt(managerUsuarioId) },
-          },
-          ubicacion: {
-            connect: { id: ubicacion.id },
           },
           photoUrls: [],
         },
@@ -357,8 +446,9 @@ export const createProperty = (req: Request, res: Response): void => {
       const updated = await prisma.alojamiento.update({
         where: { id: alojamiento.id },
         data: { photoUrls },
-        include: { propietario: true, ubicacion: true },
+        include: { propietario: true },
       });
+
 
       // Limpieza carpeta temporal
       fs.rmdirSync(tempDir, { recursive: true });
@@ -402,6 +492,76 @@ export const uploadPropertyImages = async (req: Request, res: Response) => {
       return res.status(500).json({ message: "Error al actualizar las URLs de imágenes", error: error.message });
     }
   });
+};
+
+// Republicar alojamiento suspendido (cambiar estado de "Suspendido" a "Pendiente")
+export const republishProperty = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const alojamientoId = Number(req.params.id);
+    const { userId } = req.body;
+
+    if (isNaN(alojamientoId)) {
+      res.status(400).json({ message: "ID de alojamiento inválido" });
+      return;
+    }
+
+    // Verificar que el alojamiento existe y pertenece al propietario
+    const alojamiento = await prisma.alojamiento.findUnique({
+      where: { id: alojamientoId },
+      include: {
+        propietario: true,
+      }
+    });
+
+    if (!alojamiento) {
+      res.status(404).json({ message: "Alojamiento no encontrado" });
+      return;
+    }
+
+    // Verificar que el propietario es el dueño del alojamiento
+    if (alojamiento.managerUsuarioId !== userId) {
+      res.status(403).json({ message: "No tienes permisos para republicar este alojamiento" });
+      return;
+    }
+
+    // Verificar que el propietario no esté suspendido
+    if (alojamiento.propietario?.isSuspended) {
+      res.status(403).json({ message: "Tu cuenta está suspendida, no puedes republicar alojamientos" });
+      return;
+    }
+
+    // Verificar que el alojamiento esté en estado "Suspendido"
+    if (alojamiento.estado !== "Suspendido") {
+      res.status(400).json({ message: "Solo se pueden republicar alojamientos suspendidos" });
+      return;
+    }
+
+    // Cambiar estado a "Pendiente" para revisión
+    const updatedAlojamiento = await prisma.alojamiento.update({
+      where: { id: alojamientoId },
+      data: {
+        estado: "Pendiente",
+      },
+      include: {
+        propietario: {
+          select: {
+            id: true,
+            nombre: true,
+            email: true,
+          }
+        }
+      }
+    });
+
+    res.status(200).json({
+      message: "Alojamiento republicado correctamente. Será revisado por el administrador.",
+      alojamiento: updatedAlojamiento
+    });
+
+  } catch (error: any) {
+    console.error("Error al republicar alojamiento:", error);
+    res.status(500).json({ message: "Error al republicar el alojamiento", error: error.message });
+  }
 };
 
 // Mapeo de booleanos

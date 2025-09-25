@@ -1,242 +1,142 @@
 "use client";
 
-import React, { useEffect } from "react";
-import {
-  Authenticator,
-  Heading,
-  Radio,
-  RadioGroupField,
-  useAuthenticator,
-  View,
-} from "@aws-amplify/ui-react";
-import "@aws-amplify/ui-react/styles.css";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { I18n } from "aws-amplify/utils";
-import { translations } from "@aws-amplify/ui-react";
-import { fetchAuthSession, signOut } from "aws-amplify/auth";
-import { jwtDecode } from "jwt-decode";
-import { NAVBAR_HEIGHT } from "@/lib/constants";
-import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useGetAuthUserQuery } from "@/state/api";
+import { Usuario } from "@/types/prismaTypes";
+import { NAVBAR_HEIGHT } from "@/lib/constants";
 
+interface AuthContextType {
+  user: User | null;
+  isAuthenticated: boolean;
+  login: (token: string, userData: any) => void;
+  logout: () => void;
+  isLoading: boolean;
+}
 
-I18n.putVocabularies(translations);
-I18n.setLanguage("es");
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const components = {
-  SignIn: {
-    Header() {
-      return (
-        <View className="mt-4 mb-7 !text-center">
-          <Heading level={1} className="!text-2xl !font-bold">
-            Inicio de sesión
-          </Heading>
-          <p className="text-muted-foreground mt-2">
-            <span className="font-bold">¡Bienvenido!</span> Accede o regístrate para explorar las propiedades disponibles.
-          </p>
-        </View>
-      );
-    },
-    Footer() {
-      const { toSignUp, toForgotPassword } = useAuthenticator();
-      return (
-        <View className="text-center mt-4">
-          <p className="text-muted-foreground">
-            ¿No estás registrado?{" "}
-            <button
-              onClick={toSignUp}
-              className="text-primary hover:underline bg-transparent border-none p-0 font-bold"
-            >
-              Regístrate.
-            </button>
-          </p>
-          <p className="text-muted-foreground">
-            <button
-              onClick={toForgotPassword}
-              className="text-primary hover:underline bg-transparent border-none p-0 mt-2"
-            >
-              ¿Olvidaste tu contraseña?
-            </button>
-          </p>
-        </View>
-      );
-    },
-  },
-
-  SignUp: {
-    Header() {
-      return (
-        <View className="mt-4 mb-7 !text-center">
-          <Heading level={1} className="!text-2xl !font-bold">
-            Registro
-          </Heading>
-          <p className="text-muted-foreground mt-2">
-            <span className="font-bold">¡Bienvenido!</span> Crea una cuenta para contactar con propietarios de alojamientos.
-          </p>
-        </View>
-      );
-    },
-    FormFields() {
-      const { validationErrors } = useAuthenticator();
-      return (
-        <>
-          <Authenticator.SignUp.FormFields />
-          <RadioGroupField
-            legend="Perfil"
-            name="custom:role"
-            errorMessage={validationErrors?.["custom:role"]}
-            hasError={!!validationErrors?.["custom:role"]}
-            isRequired
-          >
-            <Radio value="Estudiante">Estudiante</Radio>
-            <Radio value="Propietario">Propietario</Radio>
-          </RadioGroupField>
-        </>
-      );
-    },
-    Footer() {
-      const { toSignIn } = useAuthenticator();
-      return (
-        <View className="text-center mt-4">
-          <p className="text-muted-foreground">
-            ¿Ya estás registrado?{" "}
-            <button
-              onClick={toSignIn}
-              className="text-primary hover:underline bg-transparent border-none p-0 font-bold"
-            >
-              Inicia sesión.
-            </button>
-          </p>
-        </View>
-      );
-    },
-  },
-
-};
-
-const formFields = {
-  signIn: {
-    username: {
-      order: 1,
-      placeholder: "Introduce tu email",
-      label: "Email",
-      isRequired: true,
-    },
-    password: {
-      order: 2,
-      placeholder: "Introduce tu contraseña",
-      label: "Password",
-      isRequired: true,
-    },
-  },
-  signUp: {
-    name: {
-      order: 1,
-      placeholder: "Introduce tu nombre completo",
-      label: "Nombre",
-      isRequired: true,
-    },
-    username: {
-      order: 2,
-      placeholder: "Introduce tu email",
-      label: "Email",
-      isRequired: true,
-    },
-    password: {
-      order: 3,
-      placeholder: "Introduce tu contraseña",
-      label: "Contraseña",
-      isRequired: true,
-    },
-    confirm_password: {
-      order: 4,
-      placeholder: "Confirma tu contraseña",
-      label: "Confirmar contraseña",
-      isRequired: true,
-    },
-  },
-  forgotPassword: {
-    username: {
-      order: 1,
-      placeholder: "Introduce tu email",
-      label: "Email",
-      isRequired: true,
-    },
-  },
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 };
 
 const Auth = ({ children }: { children?: React.ReactNode }) => {
-  const { user } = useAuthenticator((context) => [context.user]);
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
-  const isAuthPage = pathname.match(/^\/(login|registro|recuperar-contrasena)$/);
+  const isAuthPage = Boolean(pathname.match(/^\/(login|registro|recuperar-contrasena)$/));
 
+  // Solo hacer la query si estamos autenticados Y no en una página de auth
+  const { data: userData, isLoading, isError } = useGetAuthUserQuery(undefined, {
+    skip: !isAuthenticated || isAuthPage || !isInitialized
+  });
+
+  // Initialize authentication state on mount
   useEffect(() => {
-    if (!isAuthPage || !user) return;
-
-    const crearUsuarioEnBD = async () => {
+    const token = localStorage.getItem("token");
+    const storedUser = localStorage.getItem("user");
+    
+    if (token && storedUser) {
       try {
-        const session = await fetchAuthSession();
-        const idToken = session.tokens?.idToken?.toString();
-        
-        if (!idToken) return;
-
-        const payload: any = jwtDecode(idToken);
-        const { email, name, ["custom:role"]: role } = payload;
-
-        if (!email || !name || !role) return;
-        if (role.toLowerCase() !== "estudiante" && role.toLowerCase() !== "propietario") return;
-
-        const endpoint = role === "estudiante" ? "/estudiante" : "/propietario";
-
-        await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}${endpoint}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${idToken}`,
-          },
-          body: JSON.stringify({ nombre: name, telefono: "" }),
-        });
-      } catch (err) {
-        console.error("Error creando usuario:", err);
+        const parsedUser = JSON.parse(storedUser);
+        setIsAuthenticated(true);
+        setUser(parsedUser);
+      } catch (error) {
+        console.error("Error parsing stored user:", error);
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
       }
-    };
+    }
+    setIsInitialized(true);
+  }, []);
 
-    crearUsuarioEnBD();
-  }, [isAuthPage, user]);
-
+  // Update user data when query succeeds (solo si tenemos datos frescos)
   useEffect(() => {
-    if (user && isAuthPage) {
+    if (userData && isAuthenticated && !isAuthPage) {
+      setUser(userData);
+    }
+  }, [userData, isAuthenticated, isAuthPage]);
+
+  // Handle API errors (token expired, etc.)
+  useEffect(() => {
+    if (isError && isAuthenticated && !isAuthPage) {
+      // El token probablemente expiró, hacer logout
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      setUser(null);
+      setIsAuthenticated(false);
+      router.push("/login");
+    }
+  }, [isError, isAuthenticated, isAuthPage, router]);
+
+  // Redirect logic - solo después de inicializar
+  useEffect(() => {
+    if (!isInitialized) return;
+    
+    // Si estás autenticado y en una página de auth, redirigir al home
+    if (isAuthenticated && isAuthPage) {
       router.push("/");
     }
-  }, [user, isAuthPage, router]);
+  }, [isAuthenticated, isAuthPage, router, isInitialized]);
+
+  const login = (token: string, userData: any) => {
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(userData));
+    setUser(userData);
+    setIsAuthenticated(true);
+  };
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    setIsAuthenticated(false);
+    router.push("/login");
+  };
+
+  const contextValue: AuthContextType = {
+    user,
+    isAuthenticated,
+    login,
+    logout,
+    isLoading: !isInitialized || isLoading,
+  };
 
   if (isAuthPage) {
     return (
-      <div className="flex flex-col min-h-screen" style={{ paddingTop: `${NAVBAR_HEIGHT}px` }}>
-        <Navbar />
-        <main className="flex-grow flex items-center justify-center">
-          <Authenticator
-            initialState={
-              pathname.includes("registro")
-                ? "signUp"
-                : pathname.includes("recuperar-contrasena")
-                ? "forgotPassword"
-                : "signIn"
-            }
-            components={components}
-            formFields={formFields}
-          />
-        </main>
-        <Footer />
-      </div>
-    );
-  }else{
-    return <>{children}</>;
+      <AuthContext.Provider value={contextValue}>
+        <div 
+          className="flex flex-col justify-between"
+          style={{ 
+            minHeight: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
+            height: `calc(100vh - ${NAVBAR_HEIGHT}px)`
+          }}
+        >
+          <main className="flex-grow flex items-center justify-center py-8">
+            {children}
+          </main>
+        </div>
+      </AuthContext.Provider>
 
+    );
   }
 
+  return (
+    <AuthContext.Provider value={contextValue}>
+      {children}
+              <Footer />
+
+    </AuthContext.Provider>
+    
+  );
 };
 
 export default Auth;

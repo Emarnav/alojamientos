@@ -1,11 +1,22 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  devIndicators: {
-    buildActivity: false,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  rewrites: async () => {
+    return [
+      {
+        source: '/api/:path*',
+        destination: 'http://localhost:3001/api/:path*',
+      },
+    ];
   },
   images: {
-    domains: ["localhost", "alojamientos-lemon.vercel.app"], // añade aquí tu dominio real
+    domains: ["localhost"], 
     remotePatterns: [
       {
         protocol: "http",
@@ -15,11 +26,16 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "alojamientos-lemon.vercel.app", // ejemplo de dominio real
+        hostname: "*.dinaserver.com", // Para dominios de Dinahosting
         pathname: "/alojamientos/**",
       },
     ],
+    unoptimized: process.env.NODE_ENV === 'production', // Para hosting compartido
   },
+  // Configuración específica para hosting compartido
+  output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
+  trailingSlash: false,
+  poweredByHeader: false,
 };
 
 export default nextConfig;

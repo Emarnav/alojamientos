@@ -58,7 +58,11 @@ const UpdateProperty = () => {
       direccion: "",
       ciudad: "",
       provincia: "",
+      pais: "España",
       codigoPostal: "",
+      portal: "",
+      piso: "",
+      puerta: "",
       tipoAlojamiento: undefined,
       dirigidoA: undefined,
       precio: 0,
@@ -98,16 +102,12 @@ const UpdateProperty = () => {
 useEffect(() => {
   
   if (propertyData) {
-    const { propietario, ubicacion, id, photoUrls, ...rest } = propertyData;
+    const { propietario, id, photoUrls, ...rest } = propertyData;
     form.reset({
       ...rest,
       tipoAlojamiento: rest.tipoAlojamiento as "Colegio Mayor" | "Piso" | "Piso Compartido" | "Residencia Familiar" | "Residencia Universitaria",
       estado: rest.estado as "Pendiente" | "Aprobado" | "Rechazado",
       dirigidoA: rest.dirigidoA as "Solo Chicas" | "Solo Chicos" | "Mixto",
-      direccion: ubicacion?.direccion ?? "",
-      ciudad: ubicacion?.ciudad ?? "",
-      provincia: ubicacion?.provincia ?? "",
-      codigoPostal: ubicacion?.codigoPostal ?? "",
       motivoRechazo: rest.motivoRechazo ?? "",
       photoUrls: [], 
     });
@@ -326,11 +326,12 @@ useEffect(() => {
               <h3 className="text-sm font-medium mb-2">Imágenes actuales</h3>
               <div className="grid grid-cols-3 gap-4">
                 {existingImages.map((filename, idx) => (
-                  <div key={idx} className="relative group">
+                  <div key={idx} className="relative group h-32">
                     <Image
                       src={`${process.env.NEXT_PUBLIC_MEDIA_BASE_URL}${filename}`}
                       alt={`Imagen ${idx}`}
-                      className="rounded w-full h-32 object-cover"
+                      fill
+                      className="rounded object-cover"
                     />
 
                     <button

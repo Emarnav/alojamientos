@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import { Form } from "@/components/ui/form";
 import { PropertyFormData, propertySchema } from "@/lib/schemas";
 import {
-  useGetPropertyQuery,
+  useGetAdminPropertyQuery,
   useGetAuthUserQuery,
   useApproveAlojamientoMutation,
   useRejectAlojamientoMutation,
@@ -27,7 +27,7 @@ const CheckProperty = () => {
   const [showRejectionReason, setShowRejectionReason] = useState(false);
   const [existingImages, setExistingImages] = useState<string[]>([]);
   const { data: authUser } = useGetAuthUserQuery();
-  const { data: propertyData } = useGetPropertyQuery(Number(alojamientoId));
+  const { data: propertyData } = useGetAdminPropertyQuery(Number(alojamientoId));
 
   const form = useForm<PropertyFormData>({
     resolver: zodResolver(propertySchema),
@@ -37,7 +37,11 @@ const CheckProperty = () => {
       direccion: "",
       ciudad: "",
       provincia: "",
+      pais: "España",
       codigoPostal: "",
+      portal: "",
+      piso: "",
+      puerta: "",
       tipoAlojamiento: undefined,
       dirigidoA: undefined,
       precio: 0,
@@ -84,17 +88,13 @@ const CheckProperty = () => {
       return;
     }
     if (propertyData) {
-      const { propietario, ubicacion, id, photoUrls, ...rest } = propertyData;
+      const { propietario, id, photoUrls, ...rest } = propertyData;
       form.reset({
         ...rest,
         motivoRechazo: rest.motivoRechazo ?? "",
         dirigidoA: rest.dirigidoA as "Solo Chicas" | "Solo Chicos" | "Mixto",
         estado: rest.estado as "Pendiente" | "Aprobado" | "Rechazado",
         tipoAlojamiento: rest.tipoAlojamiento as "Colegio Mayor" | "Piso" | "Piso Compartido" | "Residencia Familiar" | "Residencia Universitaria",
-        direccion: ubicacion?.direccion ?? "",
-        ciudad: ubicacion?.ciudad ?? "",
-        provincia: ubicacion?.provincia ?? "",
-        codigoPostal: ubicacion?.codigoPostal ?? "",
         photoUrls: [],
       });
       setExistingImages(photoUrls);

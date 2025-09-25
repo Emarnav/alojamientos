@@ -2,17 +2,16 @@
 
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
-import { wktToGeoJSON } from "@terraformer/wkt";
 
 const prisma = new PrismaClient();
 
-// Obtener usuario por cognitoId
+// Obtener usuario por userId
 export const getTenant = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { cognitoId } = req.params;
+    const { userId } = req.params;
 
     const usuario = await prisma.usuario.findUnique({
-      where: { cognitoId },
+      where: { id: Number(userId) },
       include: { alojamientosFavoritos: true },
     });
 
@@ -27,35 +26,21 @@ export const getTenant = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
-// Crear estudiante
-export const createTenant = async (req: Request, res: Response): Promise<void> => {
+// Actualizar perfil de estudiante
+export const updateStudentProfile = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { nombre } = req.body;
-    const { cognitoId, email } = req.user!;
+    const { telefono } = req.body;
+    const { userId } = req.user!;
 
-    if (!nombre || !email ) {
-      res.status(400).json({ message: "Faltan datos obligatorios para crear el estudiante." });
-      return;
-    }
-
-    const existingUser = await prisma.usuario.findUnique({ where: { cognitoId } });
-    if (existingUser) {
-      res.status(409).json({ message: "El usuario ya existe." });
-      return;
-    }
-
-    const usuario = await prisma.usuario.create({
-      data: {
-        cognitoId,
-        email,
-        nombre,
-        tipo: "Estudiante",
-      },
+    const updatedUser = await prisma.usuario.update({
+      where: { id: userId },
+      data: { telefono },
+      include: { alojamientosFavoritos: true },
     });
 
-    res.status(201).json(usuario);
+    res.status(200).json(updatedUser);
   } catch (error: any) {
-    res.status(500).json({ message: `Error al crear el estudiante: ${error.message}` });
+    res.status(500).json({ message: `Error al actualizar el perfil del estudiante: ${error.message}` });
   }
 };
 
@@ -63,11 +48,11 @@ export const createTenant = async (req: Request, res: Response): Promise<void> =
 // Actualizar usuario
 export const updateStudent = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { cognitoId } = req.params;
+    const { userId } = req.params;
     const { nombre, email, telefono } = req.body;
 
     const updated = await prisma.usuario.update({
-      where: { cognitoId },
+      where: { id: Number(userId) },
       data: { nombre, email, telefono },
     });
 
@@ -77,13 +62,13 @@ export const updateStudent = async (req: Request, res: Response): Promise<void> 
   }
 };
 
-// Obtener alojamientos favoritos con coordenadas
+// Obtener alojamientos favoritos
 export const getCurrentResidences = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { cognitoId } = req.params;
+    const { userId } = req.params;
 
     const usuario = await prisma.usuario.findUnique({
-      where: { cognitoId },
+      where: { id: Number(userId) },
     });
 
     if (!usuario || usuario.tipo !== "Estudiante") {
@@ -95,8 +80,9 @@ export const getCurrentResidences = async (req: Request, res: Response): Promise
       where: { id: usuario.id },
       include: {
         alojamientosFavoritos: {
-          include: {
-            ubicacion: true,
+          where: {
+            // Solo mostrar alojamientos aprobados (excluir suspendidos, pendientes y rechazados)
+            estado: "Aprobado",
           },
         },
       },
@@ -107,26 +93,7 @@ export const getCurrentResidences = async (req: Request, res: Response): Promise
       return;
     }
 
-    const formatted = await Promise.all(
-      properties.alojamientosFavoritos.map(async (property) => {
-        const coordinates: { coordinates: string }[] =
-          await prisma.$queryRaw`SELECT ST_asText(coordinates) as coordinates FROM "Ubicacion" WHERE id = ${property.ubicacion.id}`;
-
-        const geoJSON: any = wktToGeoJSON(coordinates[0]?.coordinates || "");
-        return {
-          ...property,
-          ubicacion: {
-            ...property.ubicacion,
-            coordinates: {
-              longitude: geoJSON.coordinates[0],
-              latitude: geoJSON.coordinates[1],
-            },
-          },
-        };
-      })
-    );
-
-    res.json(formatted);
+    res.json(properties.alojamientosFavoritos);
   } catch (error: any) {
     res.status(500).json({ message: `Error al recuperar alojamientos: ${error.message}` });
   }
@@ -135,10 +102,10 @@ export const getCurrentResidences = async (req: Request, res: Response): Promise
 // Añadir favorito
 export const addFavoriteProperty = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { cognitoId, propertyId } = req.params;
+    const { userId, propertyId } = req.params;
 
     const usuario = await prisma.usuario.findUnique({
-      where: { cognitoId },
+      where: { id: Number(userId) },
       include: { alojamientosFavoritos: true },
     });
 
@@ -175,10 +142,10 @@ export const addFavoriteProperty = async (req: Request, res: Response): Promise<
 // Eliminar favorito
 export const removeFavoriteProperty = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { cognitoId, propertyId } = req.params;
+    const { userId, propertyId } = req.params;
 
     const usuario = await prisma.usuario.findUnique({
-      where: { cognitoId },
+      where: { id: Number(userId) },
     });
 
     if (!usuario || usuario.tipo !== "Estudiante") {

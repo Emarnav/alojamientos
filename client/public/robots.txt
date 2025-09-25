@@ -1,0 +1,39 @@
+# SITIO WEB NO PÚBLICO - ACCESO RESTRINGIDO
+# Este sitio está en desarrollo y no debe ser indexado por motores de búsqueda
+
+User-agent: *
+Disallow: /
+
+# Bloquear todos los bots principales
+User-agent: Googlebot
+Disallow: /
+
+User-agent: Bingbot
+Disallow: /
+
+User-agent: Slurp
+Disallow: /
+
+User-agent: DuckDuckBot
+Disallow: /
+
+User-agent: Baiduspider
+Disallow: /
+
+User-agent: YandexBot
+Disallow: /
+
+User-agent: facebookexternalhit
+Disallow: /
+
+User-agent: Twitterbot
+Disallow: /
+
+User-agent: LinkedInBot
+Disallow: /
+
+User-agent: WhatsApp
+Disallow: /
+
+# Sin sitemap hasta nuevo aviso
+# Sitemap:

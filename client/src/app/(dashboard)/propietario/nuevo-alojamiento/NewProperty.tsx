@@ -26,7 +26,11 @@ const NewProperty = () => {
       direccion: "",
       ciudad: "",
       provincia: "",
+      pais: "España",
       codigoPostal: "",
+      portal: "",
+      piso: "",
+      puerta: "",
       precio: 0,
       plazasLibres: 0,
       habitaciones: 1,
@@ -73,7 +77,7 @@ const NewProperty = () => {
       });
 
 
-      // Añadir el resto de campos
+      // Añadir el resto de campos (excluyendo photoUrls)
       Object.entries(data).forEach(([key, value]) => {
         if (key !== "photoUrls") {
           formData.append(key, String(value));
@@ -133,20 +137,46 @@ const NewProperty = () => {
                   placeholder="Escribe una descripción detallada del alojamiento"
                 />
 
-                <div className="flex justify-between gap-4 ">
-                  <CustomFormField name="ciudad" label="Localidad" className="w-full" />
+                {/* Address Fields */}
+                <h3 className="text-base font-semibold mb-4">Ubicación</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <CustomFormField
+                    name="direccion"
+                    label="Dirección"
+                    placeholder="Calle, número..."
+                    className="md:col-span-2"
+                  />
+                  <CustomFormField
+                    name="ciudad"
+                    label="Ciudad"
+                    placeholder="Valencia, Alicante, Castellón..."
+                  />
                   <CustomFormField
                     name="provincia"
                     label="Provincia"
-                    className="w-full"
+                    placeholder="Valencia, Alicante, Castellón..."
                   />
                   <CustomFormField
                     name="codigoPostal"
                     label="Código Postal"
-                    className="w-full"
+                    placeholder="46001..."
+                  />
+                  <CustomFormField
+                    name="portal"
+                    label="Portal (opcional)"
+                    placeholder="A, B, 1..."
+                  />
+                  <CustomFormField
+                    name="piso"
+                    label="Piso (opcional)"
+                    placeholder="1º, 2º..."
+                  />
+                  <CustomFormField
+                    name="puerta"
+                    label="Puerta (opcional)"
+                    placeholder="A, B, 1..."
                   />
                 </div>
-                <CustomFormField name="direccion" label="Dirección" />
                 <div className="flex justify-between gap-4 ">
                   <CustomFormField
                     name="tipoAlojamiento"

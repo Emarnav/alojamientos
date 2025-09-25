@@ -10,7 +10,6 @@ import { useSearchParams } from "next/navigation";
 import FiltersBar from "./FiltersBar";
 import FiltersFull from "./FiltersFull";
 import Listings from "./Listings";
-import Map from "./Map";
 import React, { useEffect } from "react";
 import { NAVBAR_HEIGHT } from "@/lib/constants";
 
@@ -23,18 +22,18 @@ const SearchPage = () => {
   );
 
   const {
-    data: alojamientos,
+    data: propertiesData,
     isLoading,
     isError,
   } = useGetPropertiesQuery(filters);
+
+  const alojamientos = propertiesData?.alojamientos || [];
 
   useEffect(() => {
     const initialFilters = Array.from(searchParams.entries()).reduce(
       (acc: any, [key, value]) => {
         if (key === "rangoPrecio" || key === "superficie") {
           acc[key] = value.split(",").map((v) => (v === "" ? null : Number(v)));
-        } else if (key === "coordinates") {
-          acc[key] = value.split(",").map(Number);
         } else {
           acc[key] = value === "any" ? null : value;
         }
@@ -54,7 +53,7 @@ const SearchPage = () => {
       style={{ height: `calc(100vh - ${NAVBAR_HEIGHT}px)` }}
     >
       <FiltersBar />
-      <div className="flex justify-between flex-1 overflow-hidden gap-3 mb-5">
+      <div className="flex flex-1 overflow-hidden gap-3 mb-5">
         <div
           className={`h-full overflow-auto transition-all duration-300 ease-in-out ${
             isFiltersFullOpen
@@ -65,8 +64,7 @@ const SearchPage = () => {
           <FiltersFull />
         </div>
 
-        <Map alojamientos={alojamientos} isLoading={isLoading} isError={isError} />
-        <div className="basis-4/12 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto">
           <Listings alojamientos={alojamientos} isLoading={isLoading} isError={isError} />
         </div>
       </div>
