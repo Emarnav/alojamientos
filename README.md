@@ -97,13 +97,17 @@ npm run build:server
 npm run build:client
 ```
 
-### Iniciar Producción Localmente
+### Iniciar en Producción
 
 ```bash
-# Servidor
+# Opción 1: Con PM2 (recomendado)
+pm2 start ecosystem.config.js
+
+# Opción 2: Manual en terminales separadas
+# Terminal 1: Servidor
 npm run start:server
 
-# Cliente
+# Terminal 2: Cliente
 npm run start:client
 ```
 

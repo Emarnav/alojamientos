@@ -10,7 +10,9 @@
       "Bash(npx tsc:*)",
       "WebSearch",
       "Bash(npm run install:all:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Bash(grep:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

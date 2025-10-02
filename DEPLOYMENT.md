@@ -23,16 +23,20 @@ Esta guía explica cómo desplegar el cliente (Next.js) y el servidor (Express) 
 ssh usuario@tuservidor.dinahosting.com
 ```
 
-### 2. Clonar o Actualizar el Repositorio
+### 2. Clonar el Repositorio en /www
 
 ```bash
-# Si es primera vez
-git clone https://github.com/tu-usuario/tu-repo.git
-cd CEU
+cd /www
 
-# Si ya existe
-cd CEU
-git pull origin main
+# Limpiar directorio (CUIDADO: borra todo)
+rm -rf * .[^.]*
+
+# Clonar directamente en /www (punto al final importante)
+git clone https://github.com/Emarnav/alojamientos.git .
+
+# Verificar
+ls -la
+# Deberías ver: package.json, client/, server/, etc.
 ```
 
 ### 3. Instalar Dependencias
