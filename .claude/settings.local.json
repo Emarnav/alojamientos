@@ -13,7 +13,8 @@
       "Bash(git rm:*)",
       "Bash(grep:*)",
       "Bash(git add:*)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nLimpiar proyecto para despliegue en producción\n\nEliminados archivos innecesarios:\n- CAMBIOS.md (temporal, innecesario en repo)\n- passenger-config.json (obsoleto, app.js ya no existe)\n- start-production.sh y stop-production.sh (innecesarios para Dinahosting)\n- server/ecosystem.config.js (duplicado, usar el de raíz)\n- client/src/restart.txt (archivo temporal)\n\nActualizaciones:\n- .gitignore: Eliminadas referencias a logs/ y pids/\n- DEPLOYMENT.md: Actualizado con instrucciones de clone directo en /www\n- README.md: Simplificadas instrucciones de producción\n\nEstructura limpia y lista para despliegue SSH en Dinahosting.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
+      "Bash(git commit -m \"$(cat <<''EOF''\nLimpiar proyecto para despliegue en producción\n\nEliminados archivos innecesarios:\n- CAMBIOS.md (temporal, innecesario en repo)\n- passenger-config.json (obsoleto, app.js ya no existe)\n- start-production.sh y stop-production.sh (innecesarios para Dinahosting)\n- server/ecosystem.config.js (duplicado, usar el de raíz)\n- client/src/restart.txt (archivo temporal)\n\nActualizaciones:\n- .gitignore: Eliminadas referencias a logs/ y pids/\n- DEPLOYMENT.md: Actualizado con instrucciones de clone directo en /www\n- README.md: Simplificadas instrucciones de producción\n\nEstructura limpia y lista para despliegue SSH en Dinahosting.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []

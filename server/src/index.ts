@@ -60,14 +60,16 @@ app.use(helmet({
 }));
 
 // CORS configuration - permitir cliente separado
+const allowedOrigins = process.env.NODE_ENV === 'production'
+  ? [
+      'https://alojamientos.uchceu.es',
+      'https://www.alojamientos.uchceu.es',
+      process.env.CLIENT_URL
+    ].filter((origin): origin is string => Boolean(origin))
+  : ['http://localhost:3001', 'http://localhost:3000', 'http://localhost:3004'];
+
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? [
-        'https://alojamientos.uchceu.es',
-        'https://www.alojamientos.uchceu.es',
-        process.env.CLIENT_URL // URL del cliente si está en dominio/puerto diferente
-      ].filter(Boolean)
-    : ['http://localhost:3001', 'http://localhost:3000', 'http://localhost:3004'],
+  origin: allowedOrigins,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
