@@ -50,7 +50,7 @@ export const updateProperty = (req: Request, res: Response): void => {
       const existing = JSON.parse(req.body.existingPhotos ?? "[]");
 
       // 2. Fotos nuevas subidas ahora
-      const newPhotos = files?.map(file => `/alojamientos/${alojamientoId}/${file.filename}`) ?? [];
+      const newPhotos = files?.map(file => `/uploads/${alojamientoId}/${file.filename}`) ?? [];
 
       // 3. Combinar todo
       const photoUrls = [...existing, ...newPhotos];
@@ -440,7 +440,7 @@ export const createProperty = (req: Request, res: Response): void => {
         const filename = path.basename(file.filename);
         const newPath = path.join(finalDir, filename);
         fs.renameSync(path.join(tempDir, filename), newPath);
-        return `/alojamientos/${alojamiento.id}/${filename}`;
+        return `/uploads/${alojamiento.id}/${filename}`;
       });
 
       const updated = await prisma.alojamiento.update({
@@ -479,7 +479,7 @@ export const uploadPropertyImages = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "No se han subido imágenes" });
     }
 
-    const photoUrls = files.map((file) => `/alojamientos/${alojamientoId}/${file.filename}`);
+    const photoUrls = files.map((file) => `/uploads/${alojamientoId}/${file.filename}`);
 
     try {
       const updated = await prisma.alojamiento.update({

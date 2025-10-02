@@ -59,10 +59,14 @@ app.use(helmet({
   }
 }));
 
-// CORS configuration
+// CORS configuration - permitir cliente separado
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://alojamientos.uchceu.es', 'https://www.alojamientos.uchceu.es']
+  origin: process.env.NODE_ENV === 'production'
+    ? [
+        'https://alojamientos.uchceu.es',
+        'https://www.alojamientos.uchceu.es',
+        process.env.CLIENT_URL // URL del cliente si está en dominio/puerto diferente
+      ].filter(Boolean)
     : ['http://localhost:3001', 'http://localhost:3000', 'http://localhost:3004'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -88,7 +92,7 @@ app.use(sanitizeHtml);
 app.use(morgan("combined"));
 
 /* Servir archivos estáticos - imágenes de alojamientos */
-app.use('/alojamientos', express.static(path.join(__dirname, "../public/alojamientos"), {
+app.use('/uploads', express.static(path.join(__dirname, "../public/alojamientos"), {
   maxAge: process.env.NODE_ENV === 'production' ? '30d' : '1d',
   setHeaders: (res, filePath) => {
     if (filePath.match(/\.(jpg|jpeg|png|webp|gif)$/i)) {
@@ -112,7 +116,7 @@ app.use("/api/chat", chatRoutes);
 
 
 /* SERVER */
-const port = Number(process.env.PORT) || 5000;
+const port = Number(process.env.PORT) || 3001;
 
 // Health check endpoint para el API
 app.get("/", (_req, res) => {
@@ -124,18 +128,17 @@ app.get("/", (_req, res) => {
   });
 });
 
-// Solo iniciar servidor si no está siendo importado (para app.js)
-if (require.main === module) {
-  app.listen(port, "0.0.0.0", () => {
-    console.log(`🔌 API Server running on port ${port}`);
-    console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}`);
-    
-    // Enviar mensaje de ready para el proceso padre (en hosting)
-    if (process.send) {
-      process.send('ready');
-    }
-  });
-}
+// Iniciar servidor (separado del cliente)
+app.listen(port, "0.0.0.0", () => {
+  console.log(`🔌 API Server running on port ${port}`);
+  console.log(`🌍 Environment: ${process.env.NODE_ENV || "development"}`);
+  console.log(`🔗 Accepting requests from: ${process.env.CLIENT_URL || 'localhost:3000'}`);
 
-// Exportar la app para uso en app.js
+  // Enviar mensaje de ready para el proceso padre (en hosting)
+  if (process.send) {
+    process.send('ready');
+  }
+});
+
+// Exportar la app para testing
 export default app;

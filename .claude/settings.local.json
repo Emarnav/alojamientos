@@ -9,7 +9,8 @@
       "Bash(npm run dev:*)",
       "Bash(npx tsc:*)",
       "WebSearch",
-      "Bash(npm run install:all:*)"
+      "Bash(npm run install:all:*)",
+      "Bash(git rm:*)"
     ],
     "deny": [],
     "ask": []
