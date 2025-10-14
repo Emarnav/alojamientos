@@ -44,12 +44,13 @@ NODE_ENV=development
 
 #### 2. Variables de entorno del cliente
 
-El archivo `client/.env` ya está configurado para desarrollo local:
+Copiar `client/.env.example` a `client/.env` y ajustar para desarrollo local:
 
 ```env
 NEXT_PUBLIC_API_BASE_URL=http://localhost:3001/api
 NEXT_PUBLIC_BASE_URL=http://localhost:3000
 NEXT_PUBLIC_MEDIA_BASE_URL=http://localhost:3001/uploads
+PORT=3000
 ```
 
 ### Comandos de Desarrollo
@@ -121,8 +122,7 @@ CEU/
 │   │   ├── components/    # Componentes React
 │   │   ├── state/         # RTK Query API
 │   │   └── types/         # TypeScript types
-│   ├── .env               # Variables desarrollo
-│   └── .env.production    # Variables producción
+│   └── .env               # Variables de entorno
 │
 ├── server/                # API Express
 │   ├── src/
@@ -173,19 +173,20 @@ CEU/
 
 ## Despliegue en Producción
 
-Ver [DEPLOYMENT.md](./DEPLOYMENT.md) para instrucciones detalladas de despliegue en Dinahosting.
+Ver [README_DESPLIEGUE.md](./README_DESPLIEGUE.md) para guía rápida de despliegue.
+Ver [COMANDOS_DESPLIEGUE.md](./COMANDOS_DESPLIEGUE.md) para instrucciones paso a paso.
 
-### Resumen rápido:
+### Resumen:
 
-1. Conectar via SSH al servidor
-2. Clonar repositorio
-3. `npm run install:all`
-4. Configurar variables de entorno
-5. `npm run build`
-6. Configurar 2 aplicaciones Node.js en Dinahosting:
-   - **API**: `server/` en puerto 3001
-   - **Cliente**: `client/` en puerto 3000
-7. Configurar reverse proxy/subdominios
+1. Build local: `npm run build` (cliente y servidor)
+2. Crear BD PostgreSQL en Dinahosting
+3. Subir archivos al servidor
+4. Configurar 2 aplicaciones Node.js:
+   - **Cliente**: puerto 3000 → `server.js`
+   - **API**: puerto 3001 → `dist/index.js`
+5. Configurar proxy/rewrites:
+   - `/api/*`, `/uploads/*` → puerto 3001
+   - `/*` → puerto 3000
 
 ## Tecnologías Utilizadas
 

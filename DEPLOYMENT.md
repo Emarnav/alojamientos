@@ -126,17 +126,13 @@ Esto ejecuta:
 
 En el panel de Dinahosting:
 
-**Opción A: Nginx Reverse Proxy (recomendado)**
+**Nginx Reverse Proxy**
 
 Configurar proxy para:
 - `tudominio.com` → Cliente (puerto 3000)
 - `tudominio.com/api` → Servidor (puerto 3001)
 - `tudominio.com/uploads` → Servidor (puerto 3001)
 
-**Opción B: Subdominios**
-
-- `tudominio.com` → Cliente (puerto 3000)
-- `api.tudominio.com` → Servidor (puerto 3001)
 
 ### 8. Iniciar las Aplicaciones
 
