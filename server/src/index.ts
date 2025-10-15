@@ -48,11 +48,11 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://api.mapbox.com"],
-      scriptSrc: ["'self'", "https://api.mapbox.com"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
       imgSrc: ["'self'", "data:", "https:", "blob:"],
-      connectSrc: ["'self'", "https://api.mapbox.com", "https://events.mapbox.com"],
-      fontSrc: ["'self'", "https://api.mapbox.com"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'"],
       workerSrc: ["'self'", "blob:"],
       childSrc: ["'self'", "blob:"]
     }
