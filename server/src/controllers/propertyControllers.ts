@@ -185,8 +185,6 @@ export const getProperties = async (req: Request, res: Response): Promise<void> 
       propertyType,
       squareFeetMin,
       squareFeetMax,
-      latitude,
-      longitude,
       provincia,
       page = "1",
       limit = "24",

@@ -61,8 +61,6 @@ const FiltersBar = () => {
         currentArrayRange[index] = value === "any" ? null : Number(value);
       }
       newValue = currentArrayRange;
-    } else if (key === "coordinates") {
-      newValue = value === "any" ? [0, 0] : value.map(Number);
     } else {
       newValue = value === "any" ? "any" : value;
     }

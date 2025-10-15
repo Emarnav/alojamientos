@@ -279,14 +279,6 @@ export const api = createApi({
           page: filters?.page || 1,
           limit: filters?.limit || 24,
           sortBy: filters?.sortBy || "featured",
-          // Solo incluir coordenadas si no son las coordenadas por defecto
-          ...(filters?.coordinates && 
-              filters.coordinates[0] !== 0 && 
-              filters.coordinates[1] !== 0 &&
-              !(filters.coordinates[0] === -0.4280276 && filters.coordinates[1] === 39.547361) && {
-            latitude: filters.coordinates[1],
-            longitude: filters.coordinates[0],
-          }),
         });
 
         return { url: "alojamientos", params };
