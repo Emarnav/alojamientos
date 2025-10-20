@@ -6,7 +6,8 @@
       "Bash(npm run build)",
       "Read(//c/Users/Usuario/Desktop/RentalApp/CEUFinal/CEU/**)",
       "Bash(git checkout:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(npm install)"
     ],
     "deny": [],
     "ask": []
