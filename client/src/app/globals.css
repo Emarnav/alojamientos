@@ -31,7 +31,15 @@ body,
 
 @layer base {
   :root {
-    /* Paleta de colores de la aplicación original */
+    /* Colores corporativos CEU */
+    --ceu-blue: #003eb3;
+    --ceu-blue-hover: #0052d9;
+    --ceu-blue-active: #002d80;
+    --ceu-orange: #d64300;
+    --ceu-orange-hover: #e36724;
+    --ceu-orange-active: #b03200;
+
+    /* Paleta de colores de la aplicación original (legacy) */
     --white: #FFFFFF;
     --gray-light: #EEEEEE;
     --gray-light-2: #F4F4F4;
@@ -49,7 +57,7 @@ body,
     --brown: #757560;
     --violet: #9C4D85;
 
-    /* Design System - Spacing */
+    /* Design System - Spacing (CEU: 8px, 16px, 24px) */
     --space-xs: 0.25rem;    /* 4px */
     --space-sm: 0.5rem;     /* 8px */
     --space-md: 1rem;       /* 16px */
@@ -58,7 +66,7 @@ body,
     --space-2xl: 3rem;      /* 48px */
     --space-3xl: 4rem;      /* 64px */
 
-    /* Design System - Typography */
+    /* Design System - Typography (CEU: Inter, 16px base) */
     --font-size-xs: 0.75rem;     /* 12px */
     --font-size-sm: 0.875rem;    /* 14px */
     --font-size-base: 1rem;      /* 16px */
@@ -68,67 +76,61 @@ body,
     --font-size-3xl: 1.875rem;   /* 30px */
     --font-size-4xl: 2.25rem;    /* 36px */
 
-    /* Design System - Shadows */
+    /* Design System - Shadows (CEU elevated shadow) */
     --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
     --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --shadow-xl: 0 6px 16px 0 rgba(0, 0, 0, 0.08);
     --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 
-    /* Design System - Border Radius */
+    /* Design System - Border Radius (CEU: 4-8px) */
     --radius-xs: 0.125rem;   /* 2px */
-    --radius-sm: 0.375rem;   /* 6px */
-    --radius-md: 0.5rem;     /* 8px */
+    --radius-sm: 0.25rem;    /* 4px - CEU standard */
+    --radius-md: 0.5rem;     /* 8px - CEU standard */
     --radius-lg: 0.75rem;    /* 12px */
     --radius-xl: 1rem;       /* 16px */
     --radius-2xl: 1.5rem;    /* 24px */
     --radius-full: 9999px;
 
-    /* Design System - Transitions */
-    --transition-fast: 150ms ease-in-out;
-    --transition-normal: 300ms ease-in-out;
-    --transition-slow: 500ms ease-in-out;
+    /* Design System - Transitions (CEU: 0.2s cubic-bezier) */
+    --transition-fast: 200ms cubic-bezier(0.645, 0.045, 0.355, 1);
+    --transition-normal: 300ms cubic-bezier(0.645, 0.045, 0.355, 1);
+    --transition-slow: 500ms cubic-bezier(0.645, 0.045, 0.355, 1);
 
-    /* Variables CSS con estilo UCHCEU - Minimalista y profesional */
+    /* Variables CSS con estilo CEU - Basado en Ant Design */
     --background: 0 0% 100%; /* white clean */
-    --foreground: 0 0% 15%; /* dark gray for text */
+    --foreground: 217 10% 14%; /* rgba(33, 36, 39, 0.88) - CEU text */
     --card: 0 0% 100%; /* white */
-    --card-foreground: 0 0% 15%; /* dark gray */
+    --card-foreground: 217 10% 14%; /* CEU text */
     --popover: 0 0% 100%; /* white */
-    --popover-foreground: 0 0% 15%; /* dark gray */
-    --primary: 210 100% 30%; /* UCHCEU blue tone */
+    --popover-foreground: 217 10% 14%; /* CEU text */
+    --primary: 214 100% 35%; /* #003eb3 - CEU blue */
     --primary-foreground: 0 0% 100%; /* white */
-    --primary-50: 239 100% 97%;
-    --primary-100: 239 100% 93%;
-    --primary-200: 239 84% 85%;
-    --primary-300: 239 84% 77%;
-    --primary-400: 239 84% 65%;
-    --primary-500: 210 100% 30%;
-    --primary-600: 210 100% 25%;
-    --primary-700: 210 100% 20%;
-    --primary-800: 210 100% 15%;
-    --primary-900: 210 100% 10%;
+    --primary-hover: 214 100% 42%; /* #0052d9 - CEU blue hover */
+    --primary-active: 214 100% 25%; /* #002d80 - CEU blue active */
     --secondary: 0 0% 96%; /* light gray */
-    --secondary-foreground: 0 0% 15%; /* dark gray */
-    --muted: 0 0% 96%; /* very light gray */
-    --muted-foreground: 0 0% 45%; /* medium gray */
+    --secondary-foreground: 217 10% 14%; /* CEU text */
+    --muted: 217 10% 14% / 0.04; /* rgba(33, 36, 39, 0.04) - CEU muted */
+    --muted-foreground: 217 10% 14% / 0.45; /* rgba(33, 36, 39, 0.45) - CEU muted text */
     --accent: 0 0% 96%; /* light gray accent */
-    --accent-foreground: 0 0% 15%; /* dark gray */
-    --destructive: 0 84% 60%; /* subtle red */
+    --accent-foreground: 217 10% 14%; /* CEU text */
+    --destructive: 17 100% 42%; /* #d64300 - CEU orange/red */
     --destructive-foreground: 0 0% 98%; /* white */
-    --border: 0 0% 90%; /* light border */
-    --input: 0 0% 96%; /* light input background */
-    --ring: 210 100% 30%; /* UCHCEU blue */
-    --radius: var(--radius-sm); /* default radius */
+    --destructive-hover: 17 77% 52%; /* #e36724 - CEU orange hover */
+    --destructive-active: 17 100% 35%; /* #b03200 - CEU orange active */
+    --border: 217 10% 14% / 0.15; /* rgba(33, 36, 39, 0.15) - CEU border */
+    --input: 217 10% 14% / 0.04; /* rgba(33, 36, 39, 0.04) - CEU input bg */
+    --ring: 214 100% 35%; /* #003eb3 - CEU blue */
+    --radius: var(--radius-sm); /* default radius 4px - CEU standard */
     --sidebar-background: 0 0% 98%; /* very light gray */
-    --sidebar-foreground: 0 0% 15%; /* dark gray */
-    --sidebar-primary: 210 100% 30%; /* UCHCEU blue */
+    --sidebar-foreground: 217 10% 14%; /* CEU text */
+    --sidebar-primary: 214 100% 35%; /* #003eb3 - CEU blue */
     --sidebar-primary-foreground: 0 0% 100%; /* white */
     --sidebar-accent: 0 0% 96%; /* light gray */
-    --sidebar-accent-foreground: 0 0% 15%; /* dark gray */
-    --sidebar-border: 0 0% 90%; /* light border */
-    --sidebar-ring: 210 100% 30%; /* UCHCEU blue */
+    --sidebar-accent-foreground: 217 10% 14%; /* CEU text */
+    --sidebar-border: 217 10% 14% / 0.15; /* CEU border */
+    --sidebar-ring: 214 100% 35%; /* #003eb3 - CEU blue */
   }
 
   .dark {
@@ -244,34 +246,44 @@ body,
     margin-bottom: 1rem; 
   }
   
-  /* Botones estilo UCHCEU */
+  /* Botones estilo CEU - Basado en Ant Design */
   .btn-uchceu {
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.375rem;
+    padding: 0.25rem 0.75rem; /* 4px 12px - CEU standard */
+    border-radius: var(--radius-md); /* 8px - CEU standard */
     font-weight: 500;
-    transition: all 0.2s;
+    transition: var(--transition-fast);
     background-color: hsl(var(--primary));
     color: hsl(var(--primary-foreground));
   }
-  
+
   .btn-uchceu:hover {
-    background-color: hsl(var(--primary) / 0.9);
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    background-color: hsl(var(--primary-hover));
+    box-shadow: var(--shadow-xl); /* CEU elevated shadow */
   }
-  
+
+  .btn-uchceu:active {
+    background-color: hsl(var(--primary-active));
+  }
+
   .btn-uchceu-outline {
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.375rem;
+    padding: 0.25rem 0.75rem; /* 4px 12px - CEU standard */
+    border-radius: var(--radius-md); /* 8px - CEU standard */
     font-weight: 500;
-    transition: all 0.2s;
+    transition: var(--transition-fast);
     border: 1px solid hsl(var(--border));
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
   }
-  
+
   .btn-uchceu-outline:hover {
     background-color: hsl(var(--accent));
     color: hsl(var(--primary));
+    border-color: hsl(var(--primary));
+  }
+
+  .btn-uchceu-outline:active {
+    background-color: hsl(var(--muted));
+    color: hsl(var(--primary-active));
   }
 }
 

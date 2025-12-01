@@ -9,6 +9,9 @@ const config: Config = {
   ],
   theme: {
   	extend: {
+  		fontFamily: {
+  			sans: ['var(--font-inter)', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+  		},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
@@ -22,7 +25,9 @@ const config: Config = {
   			},
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))'
+  				foreground: 'hsl(var(--primary-foreground))',
+  				hover: 'hsl(var(--primary-hover))',
+  				active: 'hsl(var(--primary-active))'
   			},
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary))',
@@ -38,7 +43,9 @@ const config: Config = {
   			},
   			destructive: {
   				DEFAULT: 'hsl(var(--destructive))',
-  				foreground: 'hsl(var(--destructive-foreground))'
+  				foreground: 'hsl(var(--destructive-foreground))',
+  				hover: 'hsl(var(--destructive-hover))',
+  				active: 'hsl(var(--destructive-active))'
   			},
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
@@ -59,7 +66,23 @@ const config: Config = {
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
+  			},
+  			ceu: {
+  				blue: '#003eb3',
+  				'blue-hover': '#0052d9',
+  				'blue-active': '#002d80',
+  				orange: '#d64300',
+  				'orange-hover': '#e36724',
+  				'orange-active': '#b03200'
   			}
+  		},
+  		borderRadius: {
+  			lg: 'var(--radius-lg)',
+  			md: 'var(--radius-md)',
+  			sm: 'var(--radius-sm)',
+  		},
+  		transitionTimingFunction: {
+  			'ceu': 'cubic-bezier(0.645, 0.045, 0.355, 1)',
   		}
   	}
   },

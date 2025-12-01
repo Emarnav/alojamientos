@@ -6,12 +6,12 @@ import React from "react";
 
 const Footer = () => {
   return (
-    <footer className="bg-neutral-800 text-white py-6 w-full">
+    <footer className="bg-primary text-white py-6 w-full">
       <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
         {/* Logo CEU */}
         <div className="flex items-center">
           <Image
-            src="/logo.webp"
+            src="/logo-monocromo.png"
             alt="UCH CEU"
             width={160}
             height={40}

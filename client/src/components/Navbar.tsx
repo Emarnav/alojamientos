@@ -42,7 +42,7 @@ const Navbar = () => {
             scroll={false}
           >
               <Image
-                src="/logo.webp"
+                src="/logo.svg"
                 alt="UCHCEU Logo"
                 width={160}
                 height={40}
