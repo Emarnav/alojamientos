@@ -113,29 +113,16 @@ const Auth = ({ children }: { children?: React.ReactNode }) => {
   if (isAuthPage) {
     return (
       <AuthContext.Provider value={contextValue}>
-        <div 
-          className="flex flex-col justify-between"
-          style={{ 
-            minHeight: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
-            height: `calc(100vh - ${NAVBAR_HEIGHT}px)`
-          }}
-        >
-          <main className="flex-grow flex items-center justify-center py-8">
-            {children}
-          </main>
-        </div>
+        {children}
       </AuthContext.Provider>
-
     );
   }
 
   return (
     <AuthContext.Provider value={contextValue}>
       {children}
-              <Footer />
-
+      <Footer />
     </AuthContext.Provider>
-    
   );
 };
 
