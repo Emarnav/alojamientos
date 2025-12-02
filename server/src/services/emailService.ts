@@ -4,9 +4,14 @@ interface EmailConfig {
   host: string;
   port: number;
   secure: boolean;
+  requireTLS?: boolean;
   auth: {
     user: string;
     pass: string;
+  };
+  tls?: {
+    ciphers: string;
+    rejectUnauthorized: boolean;
   };
 }
 
@@ -33,14 +38,19 @@ class EmailService {
       return;
     }
 
-    // Configuración para Gmail (puedes cambiar por otro proveedor)
+    // Configuración para Office 365/Outlook
     const config: EmailConfig = {
-      host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+      host: process.env.EMAIL_HOST || 'smtp.office365.com',
       port: parseInt(process.env.EMAIL_PORT || '587'),
-      secure: false, // true para puerto 465, false para otros puertos
+      secure: false, // false para puerto 587 (STARTTLS)
+      requireTLS: true, // Forzar TLS
       auth: {
         user: emailUser,
         pass: emailPassword
+      },
+      tls: {
+        ciphers: 'SSLv3',
+        rejectUnauthorized: false
       }
     };
 

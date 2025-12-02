@@ -61,6 +61,7 @@ model Alojamiento {
   puerta               String?
   propietario          Usuario        @relation("PropiedadesDelUsuario", fields: [managerUsuarioId], references: [id])
   conversaciones       Conversacion[]
+  Notificacion         Notificacion[]
   favoritedBy          Usuario[]      @relation("TenantFavorites")
 }
 
@@ -78,6 +79,7 @@ model Conversacion {
   estudiante             Usuario        @relation("EstudianteConversaciones", fields: [estudianteId], references: [id])
   propietario            Usuario        @relation("ConversacionesPropietario", fields: [propietarioId], references: [id])
   mensajes               Mensaje[]
+  Notificacion           Notificacion[]
 
   @@unique([estudianteId, propietarioId, alojamientoId])
 }
@@ -90,6 +92,7 @@ model Mensaje {
   emisorId       Int
   conversacion   Conversacion   @relation(fields: [conversacionId], references: [id])
   emisor         Usuario        @relation("MensajesRemitidos", fields: [emisorId], references: [id])
+  Notificacion   Notificacion[]
 }
 
 model Usuario {
@@ -111,11 +114,37 @@ model Usuario {
   estudianteConversaciones      Conversacion[] @relation("EstudianteConversaciones")
   conversacionesComoPropietario Conversacion[] @relation("ConversacionesPropietario")
   mensajesRemitidos             Mensaje[]      @relation("MensajesRemitidos")
+  Notificacion                  Notificacion[]
   alojamientosFavoritos         Alojamiento[]  @relation("TenantFavorites")
+}
+
+model Notificacion {
+  id             Int              @id @default(autoincrement())
+  tipo           TipoNotificacion
+  titulo         String
+  descripcion    String
+  isRead         Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  usuarioId      Int
+  conversacionId Int?
+  mensajeId      Int?
+  alojamientoId  Int?
+  Alojamiento    Alojamiento?     @relation(fields: [alojamientoId], references: [id], onDelete: Cascade)
+  Conversacion   Conversacion?    @relation(fields: [conversacionId], references: [id], onDelete: Cascade)
+  Mensaje        Mensaje?         @relation(fields: [mensajeId], references: [id], onDelete: Cascade)
+  Usuario        Usuario          @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
 }
 
 enum TipoUsuario {
   Propietario
   Estudiante
   Admin
+}
+
+enum TipoNotificacion {
+  NUEVO_MENSAJE
+  NUEVA_CONVERSACION
+  PROPIEDAD_APROBADA
+  PROPIEDAD_RECHAZADA
+  NUEVA_SOLICITUD
 }

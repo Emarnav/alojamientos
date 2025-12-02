@@ -22,6 +22,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getAbsoluteImageUrls } from "@/lib/utils";
+import { NAVBAR_HEIGHT } from "@/lib/constants";
 
 const PropertyDetails = () => {
   const params = useParams();
@@ -221,7 +222,10 @@ const PropertyDetails = () => {
 
           {/* Right Column - Contact */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl p-6 shadow-lg sticky top-6">
+            <div
+              className="bg-white rounded-2xl p-6 shadow-lg sticky"
+              style={{ top: `${NAVBAR_HEIGHT + 56}px` }}
+            >
               <h3 className="text-xl font-semibold text-gray-800 mb-4">Contactar con el propietario</h3>
               
               {property.propietario && (
