@@ -12,11 +12,25 @@ import { FiltersState } from ".";
 export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
-    prepareHeaders: (headers) => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
+    prepareHeaders: (headers, { endpoint }) => {
+      // Rutas públicas que no necesitan token
+      const publicEndpoints = [
+        'login',
+        'register',
+        'forgotPassword',
+        'resetPassword',
+        'verifyEmail',
+        'resendVerificationEmail'
+      ];
+
+      // Solo agregar token si no es un endpoint público
+      if (!publicEndpoints.includes(endpoint)) {
+        const token = localStorage.getItem("token");
+        if (token) {
+          headers.set("Authorization", `Bearer ${token}`);
+        }
       }
+
       return headers;
     },
     errorHandler: (error, query, extraOptions, baseQuery) => {
